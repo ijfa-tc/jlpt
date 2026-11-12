@@ -139,6 +139,13 @@ h1{font-family:var(--f-paper);font-size:24px;margin:24px 0 4px;text-wrap:balance
 .passage .mk{font-family:var(--f-ui);font-weight:700;padding:0 2px}
 .passage .mk.cur{background:var(--ink);color:var(--sheet-bg);border-radius:3px}
 .stem .blank{min-width:2.6em}
+.pic{margin:8px 0 0}.pic img{width:100%;border:1px solid var(--rule);border-radius:4px}
+.picalt{border:1px dashed var(--rule);border-radius:6px;padding:14px;font-size:14px;color:var(--muted);line-height:1.7;margin-top:8px}
+.startrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.msel{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.msel select{font:inherit;font-size:14px;padding:6px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink)}
+.mhead{margin:18px 0 8px;font-size:15px}
+.scr summary{cursor:pointer;font-size:13px;color:var(--muted)}
 .foot{font-size:12px;color:var(--muted);margin-top:22px;line-height:1.7}
 @media (prefers-reduced-motion: reduce){.bub,.prog i{transition:none}}
 </style>
@@ -162,6 +169,7 @@ function initState(){
   S = {name:"", view:"home", idx:0, ans:{}, done:{}, listen:0, timerEnd:0, timerId:0, ex:{}, playing:false};
   SECS.forEach(sec => { S.ans[sec.id] = Array(sec.items.length).fill(0); S.done[sec.id] = false; });
   S.done.listen = false;
+  S.lans = Array(LI().length).fill(0); S.lcur = 0;
 }
 const $ = id => document.getElementById(id);
 const who = () => S.name || "No name";
@@ -193,8 +201,8 @@ function rowHTML(no, val, key, opts={}){
   }
   return `<div class="row" role="radiogroup" aria-label="問題 ${no}"><span class="no">${no}</span><div class="bubs">${b}</div></div>`;
 }
-function getAns(k){ if(k==="listen") return S.listen; const [sid,i]=k.split(":"); return S.ans[sid] ? S.ans[sid][+i] : 0; }
-function setAns(k,v){ if(k==="listen"){ S.listen=v; return; } const [sid,i]=k.split(":"); if(S.ans[sid]) S.ans[sid][+i]=v; }
+function getAns(k){ if(k.startsWith("listen:")) return S.lans[+k.split(":")[1]]; const [sid,i]=k.split(":"); return S.ans[sid] ? S.ans[sid][+i] : 0; }
+function setAns(k,v){ if(k.startsWith("listen:")){ S.lans[+k.split(":")[1]]=v; return; } const [sid,i]=k.split(":"); if(S.ans[sid]) S.ans[sid][+i]=v; }
 document.addEventListener("click", e => {
   const b = e.target.closest(".bub"); if(!b || b.disabled) return;
   const k = b.dataset.k, v = +b.dataset.v;
@@ -237,7 +245,7 @@ function home(){
     <div class="card">
       <h3>${LISTEN.name}</h3>
       <p>${LISTEN.desc || ""}</p>
-      <div class="meta">${LISTEN.meta || ""}</div>
+      <div class="meta">${LI().length}問 ・ やく 30分</div>
       <div><button class="btn" id="goListen">${S.done.listen?"結果を見る":"はじめる"}</button></div>
     </div>
     <p class="foot">試験運用版です。問題は IJFA トレーニングセンターの オリジナルです。聴解の 音声は 音声合成で 作っています。</p>`;
@@ -304,6 +312,14 @@ function submitSec(timeUp){ stopTimer(); S.done[SEC.id] = true; closeSheet(); re
 /* ---------- overview answer sheet ---------- */
 $("openSheet").onclick = openSheet;
 function openSheet(){
+  if(S.view==="listen"){
+    const ov = $("overlay"), L = LI();
+    ov.innerHTML = `<div class="sheetpanel" role="dialog" aria-label="解答用紙">
+      <div class="head"><h2>かいとうようし　聴解</h2><button class="btn ghost small" id="close">とじる</button></div>
+      <div class="grid">${LISTEN.mondai.map((md,mi)=>`<p class="lead" style="margin:6px 0 0">もんだい${md.no}</p>`+md.items.map(it=>{const g=L.findIndex(x=>x.it===it);return rowHTML(it.no,S.lans[g],"listen:"+g,{n:it.n});}).join("")).join("")}</div></div>`;
+    ov.hidden = false; $("close").onclick = closeSheet; ov.onclick = e => { if(e.target===ov) closeSheet(); };
+    return;
+  }
   if(S.view!=="q") return;
   const ov = $("overlay");
   ov.innerHTML = `<div class="sheetpanel" role="dialog" aria-label="解答用紙">
@@ -360,75 +376,101 @@ function result(which, timeUp){
     $("again").onclick = () => { S.ans[SEC.id] = Array(SEC.items.length).fill(0); S.done[SEC.id]=false; question(0); };
   } else {
     S.view="result-listen"; setHeader("結果　聴解", false);
-    const me=S.listen, good=me===LISTEN.a;
+    const L = LI(); const ok = L.filter(x=>S.lans[x.g]===x.it.a).length;
     $("app").innerHTML = `
       <h1>答えあわせ</h1>
-      <div class="rv"><div class="top"><span class="qnum">1番</span><span class="pill ${good?"ok":"ng"}">${good?"せいかい":"まちがい"}</span></div>
-        <div class="choices one" style="font-family:var(--f-paper)">${LISTEN.ch.map((c,k)=>`<div><span class="n">${k+1}</span><span>${c}</span></div>`).join("")}</div>
-        ${rowHTML(1, me, "rl", {lock:true, correct:LISTEN.a})}
-        <div class="meta" style="font-size:13px">こたえ：${LISTEN.a}　／　あなた：${me||"ぬっていない"}</div>
-        ${exHTML("ls", LISTEN.ja, LISTEN.id)}</div>
-      <div class="rv"><div class="top"><b style="font-size:14px">スクリプト（練習用）</b></div>
-        <div class="script">${LISTEN.script.map(([s,t])=>`<div>${s?`<span class="sp">${s}</span>`:""}${t}</div>`).join("")}</div>
-        <div><button class="btn ghost small" id="replay">もう一度 聞く</button></div>
-        <div class="phase" id="phase2"></div></div>
+      <div class="card"><div class="score">${ok}<small> / ${L.length}問</small></div>
+        <p>本番の 聴解は 60点中 19点が 基準点です。</p></div>
+      ${L.map(x=>{ const it=x.it, me=S.lans[x.g], good=me===it.a;
+        return `${x.it===x.md.items[0]?`<h3 class="mhead">もんだい${x.md.no}</h3>`:""}<div class="rv"><div class="top"><span class="qnum">${it.no}ばん</span><span class="pill ${good?"ok":"ng"}">${good?"せいかい":"まちがい"}</span></div>
+        <div class="choices one" style="font-family:var(--f-paper)">${it.ch.map((c,k)=>`<div><span class="n">${k+1}</span><span>${c}</span></div>`).join("")}</div>
+        ${rowHTML(it.no, me, "rl"+x.g, {lock:true, correct:it.a, n:it.n})}
+        <div class="meta" style="font-size:13px">こたえ：${it.a}　／　あなた：${me||"ぬっていない"}</div>
+        ${exHTML("ls"+x.g, it.ja, it.id)}
+        <details class="scr"><summary>スクリプト</summary><div class="script">${it.script.map(([s,t])=>`<div>${s?`<span class="sp">${s}</span>`:""}${t}</div>`).join("")}</div></details>
+        <div><button class="btn ghost small" data-replay="${x.g}">この 問題を もう一度 聞く</button> <span class="phase" id="ph${x.g}"></span></div></div>`;}).join("")}
       ${SAVE_HTML}
       <div class="nav" style="margin-top:8px"><button class="btn ghost" id="back">もどる</button><button class="btn ghost" id="again">もう一度 ためす</button></div>`;
     setupSave("listen");
     $("back").onclick = home;
-    $("again").onclick = () => { S.listen=0; S.done.listen=false; listen(); };
-    $("replay").onclick = () => { stopAudio(); playTimeline(()=>{}, (ph)=>{ $("phase2").innerHTML = `<b>${ph}</b>`; }, msg => { $("phase2").innerHTML = `<b>${msg}</b>`; }); };
+    $("again").onclick = () => { S.lans = Array(L.length).fill(0); S.done.listen=false; listen(); };
+    $("app").querySelectorAll("[data-replay]").forEach(b => b.onclick = () => {
+      const g=+b.dataset.replay; stopAudio();
+      playTimeline(L[g].it.timeline.map(s=>({...s,g})), ()=>{ $("ph"+g).textContent=""; }, (ph)=>{ $("ph"+g).textContent = ph; }, m=>{ $("ph"+g).textContent=m; });
+    });
   }
   window.scrollTo(0,0);
 }
 
-/* ---------- listening ---------- */
-function listen(){
-  S.view="listen"; setHeader(LISTEN.name, false); stopTimer();
+/* ---------- listening (all mondai, continuous) ---------- */
+function LI(){ const a=[]; LISTEN.mondai.forEach((md,mi)=>md.items.forEach((it,ii)=>a.push({md, mi, it, g:a.length}))); return a; }
+function listenPaper(gi){
+  const L = LI(), x = L[gi]; if(!x) return;
+  S.lcur = gi;
+  const it = x.it, md = x.md, first = x.it === md.items[0];
+  let body = "";
+  if(md.no<=2) body = `<div class="choices one">${it.ch.map((c,k)=>`<div><span class="n">${k+1}</span><span>${c}</span></div>`).join("")}</div>`;
+  else if(md.no===3) body = `<figure class="pic"><img src="${it.img}?v=${encodeURIComponent(VERSION)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'picalt',textContent:'（え）${it.imgDesc.replace(/'/g,"")}'}))"></figure>`;
+  else body = `<p class="note" style="margin:6px 0 0">えなどは ありません。</p>`;
+  $("lpaper").innerHTML = `
+      ${first ? `<div class="mondai"><b>もんだい${md.no}</b><p>${md.ins}</p></div>` : `<div class="mondai"><b>もんだい${md.no}</b></div>`}
+      <div class="stem" style="font-size:17px"><span class="qnum" style="min-width:2.6em">${it.no}ばん</span></div>
+      ${body}`;
+  $("lrow").innerHTML = rowHTML(it.no, S.lans[gi], "listen:"+gi, {n:it.n});
+  $("lpos").textContent = `もんだい${md.no}　${it.no}ばん`;
+}
+function listen(startMi){
+  S.view="listen"; setHeader(LISTEN.name, true); stopTimer();
+  const L = LI();
+  const firstG = startMi ? L.findIndex(x=>x.mi===startMi) : 0;
   $("app").innerHTML = `
-    <section class="paper" aria-label="もんだいようし">
-      <div class="mondai"><b>${LISTEN.m}</b><p>${LISTEN.ins}</p></div>
-      <div class="stem" style="font-size:17px"><span class="qnum" style="min-width:2.6em">1番</span></div>
-      <div class="choices one">${LISTEN.ch.map((c,k)=>`<div><span class="n">${k+1}</span><span>${c}</span></div>`).join("")}</div>
+    <section class="paper" aria-label="もんだいようし"><div id="lpaper"></div>
       <div class="player">
         <div class="prog"><i id="bar"></i></div>
-        <div class="phase" id="phase"><span>音声は 1回だけ ながれます。</span><span></span></div>
-        <div><button class="btn" id="play">音声を はじめる</button></div>
+        <div class="phase" id="phase"><span>音声は 1回だけ ながれます。とちゅうで とめられません。</span><span></span></div>
+        <div class="startrow"><button class="btn" id="play">音声を はじめる</button>
+          <label class="msel">はじめる ところ <select id="from">${LISTEN.mondai.map((md,mi)=>`<option value="${mi}" ${mi===(startMi||0)?"selected":""}>もんだい${md.no}から</option>`).join("")}</select></label></div>
       </div>
     </section>`;
   $("strip").hidden = false;
-  $("stripIn").innerHTML = `<div class="sheetlabel"><span>かいとうようし　Answer Sheet</span><span>聴解</span></div>${rowHTML(1, S.listen, "listen")}
+  $("stripIn").innerHTML = `<div class="sheetlabel"><span>かいとうようし　Answer Sheet</span><span id="lpos"></span></div><div id="lrow"></div>
     <div class="nav"><button class="btn ghost small" id="quit">やめる</button><span class="mid"></span><button class="btn small" id="lfin" disabled>答えあわせ</button></div>`;
-  $("quit").onclick = home;
+  listenPaper(firstG);
+  $("from").onchange = () => listenPaper(L.findIndex(x=>x.mi===+$("from").value));
+  $("quit").onclick = () => { stopAudio(); S.playing=false; home(); };
   $("lfin").onclick = () => { S.done.listen = true; result("listen"); };
-  $("play").onclick = () => {
-    $("play").disabled = true; $("play").textContent = "じゅんびしています";
-    playTimeline(() => { $("lfin").disabled = false; $("phase").innerHTML = `<b>おわりです。</b><span>答えあわせを おしてください</span>`; $("bar").style.width="100%"; },
-      (ph, left, frac) => {
-        $("play").textContent = "ながれています";
-        $("phase").innerHTML = `<b>${ph}</b><span>${left!=null?"あと "+left+" 秒":""}</span>`;
-        $("bar").style.width = Math.round(frac*100)+"%";
-      },
-      msg => { $("phase").innerHTML = `<b>${msg}</b>`; $("play").disabled = false; $("play").textContent = "もう一度 ためす"; });
+  $("play").onclick = async () => {
+    const mi0 = +$("from").value;
+    $("play").disabled = true; $("from").disabled = true; $("play").textContent = "じゅんびしています";
+    S.playing = true;
+    for(let mi=mi0; mi<LISTEN.mondai.length && S.playing; mi++){
+      const md = LISTEN.mondai[mi];
+      const steps = [{f:md.insFile, gap:2.0, ph:`もんだい${md.no}の せつめい`, g:L.findIndex(x=>x.mi===mi)}];
+      md.items.forEach((it,ii)=>{ const g=L.findIndex(x=>x.mi===mi && x.it===it); it.timeline.forEach(s=>steps.push({...s, g})); });
+      const ok = await new Promise(res => playTimeline(steps, () => res(true),
+        (ph, left, frac, g) => { if(g!==S.lcur) listenPaper(g); $("play").textContent = "ながれています";
+          $("phase").innerHTML = `<b>${ph}</b><span>${left!=null?"あと "+left+" 秒":""}</span>`; $("bar").style.width = Math.round(frac*100)+"%"; },
+        msg => { $("phase").innerHTML = `<b>${msg}</b>`; res(false); }));
+      if(!ok){ $("play").disabled = false; $("from").disabled = false; $("play").textContent = "もう一度 ためす"; S.playing=false; return; }
+    }
+    if(S.playing){ $("lfin").disabled = false; $("phase").innerHTML = `<b>おわりです。</b><span>答えあわせを おしてください</span>`; $("bar").style.width="100%"; }
+    S.playing = false;
   };
 }
 
 /* ---------- audio engine: decode, trim edge silence, schedule with exact gaps ---------- */
-let ctx = null, buffers = null, sources = [], uiTimer = 0;
-async function loadBuffers(){
-  if(buffers) return buffers;
+let ctx = null, sources = [], uiTimer = 0;
+const BUF = {};
+async function loadBuffers(names){
   ctx = ctx || new (window.AudioContext||window.webkitAudioContext)();
-  const tmp = {};
-  const names = [...new Set(LISTEN.timeline.map(s=>s.f))];
-  for(const k of names){
+  const need = [...new Set(names)].filter(k=>!BUF[k]);
+  await Promise.all(need.map(async k => {
     const res = await fetch(`audio/${k}.mp3?v=${encodeURIComponent(VERSION)}`);
     if(!res.ok) throw new Error("audio " + k);
     const ab = await res.arrayBuffer();
     const buf = await new Promise((ok,ng)=>ctx.decodeAudioData(ab, ok, ng));
-    tmp[k] = {buf, ...edges(buf, k.includes("chime"))};
-  }
-  buffers = tmp;
-  return buffers;
+    BUF[k] = {buf, ...edges(buf, k.includes("chime"))};
+  }));
 }
 function edges(buf, keepTail){
   const d = buf.getChannelData(0), th = 0.012, sr = buf.sampleRate;
@@ -439,11 +481,11 @@ function edges(buf, keepTail){
   s = Math.max(0, s-pad); e = keepTail ? d.length-1 : Math.min(d.length-1, e+pad);
   return {off:s/sr, dur:(e-s)/sr};
 }
-async function playTimeline(onEnd, onPhase, onError){
+async function playTimeline(steps, onEnd, onPhase, onError){
   try{
     ctx = ctx || new (window.AudioContext||window.webkitAudioContext)();
     await ctx.resume();
-    await loadBuffers();
+    await loadBuffers(steps.map(s=>s.f));
   }catch(e){
     if(onError) onError("音声を 読みこめませんでした。すこし まってから、ページを 読みこみなおして ください。");
     return;
@@ -451,13 +493,13 @@ async function playTimeline(onEnd, onPhase, onError){
   stopAudio();
   let t = ctx.currentTime + 0.4;
   const t0 = t, marks = [];
-  for(const step of LISTEN.timeline){
-    const b = buffers[step.f];
+  for(const step of steps){
+    const b = BUF[step.f];
     const src = ctx.createBufferSource(); src.buffer = b.buf; src.connect(ctx.destination);
     src.start(t, b.off, b.dur); sources.push(src);
-    marks.push({t, ph:step.ph});
+    marks.push({t, ph:step.ph, g:step.g});
     t += b.dur;
-    if(step.ans) marks.push({t, ph:"解答時間", ans:t+step.gap});
+    if(step.ans) marks.push({t, ph:"解答時間", ans:t+step.gap, g:step.g});
     t += step.gap;
   }
   const tEnd = t;
@@ -467,7 +509,7 @@ async function playTimeline(onEnd, onPhase, onError){
     let cur = marks[0];
     for(const m of marks) if(now >= m.t) cur = m;
     const left = cur.ans ? Math.ceil(cur.ans - now) : null;
-    onPhase(now < t0 ? "まもなく はじまります" : cur.ph, left, (now-t0)/(tEnd-t0));
+    onPhase(now < t0 ? "まもなく はじまります" : cur.ph, left, (now-t0)/(tEnd-t0), cur.g);
   };
   clearInterval(uiTimer); uiTimer = setInterval(tick, 200); tick();
 }
@@ -487,7 +529,7 @@ async function drawResult(which){
   const sec = which==="listen" ? null : SECS.find(s=>s.id===which);
   const rows = sec
     ? sec.items.map((q,i)=>({no:String(i+1), kind:q.m.replace("　"," "), me:S.ans[sec.id][i], a:q.a}))
-    : [{no:"1番", kind:"聴解 もんだい1（課題理解）", me:S.listen, a:LISTEN.a}];
+    : LI().map(x=>({no:`${x.it.no}`, kind:`聴解 もんだい${x.md.no}`, me:S.lans[x.g], a:x.it.a}));
   const ok = rows.filter(r=>r.me===r.a).length;
   const W=1080, rowH=76, top=400, H=top+rows.length*rowH+150;
   const c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
