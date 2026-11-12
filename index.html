@@ -128,6 +128,17 @@ h1{font-family:var(--f-paper);font-size:24px;margin:24px 0 4px;text-wrap:balance
 .lvb small{font-weight:400;font-size:11.5px;color:var(--muted)}
 .lvb.on{border-color:var(--ink);background:var(--sheet-soft)}
 .lvb.off{opacity:.5}
+.one-field{display:grid;gap:4px;font-size:12.5px;color:var(--muted)}
+.one-field input{font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%}
+.passage{font-family:var(--f-paper);font-size:15.5px;line-height:2;border:1px solid var(--rule);border-radius:4px;padding:12px 14px;margin:4px 0 14px;max-height:36vh;overflow:auto;background:var(--paper)}
+.passage .ttl{font-weight:700;margin:0 0 6px}
+.passage p{margin:6px 0}
+.info{border-collapse:collapse;width:100%;font-size:13px;line-height:1.5;font-family:var(--f-ui)}
+.info th,.info td{border:1px solid var(--ink);padding:4px 5px;vertical-align:top}
+.info th{background:var(--sheet-soft);font-weight:700}
+.passage .mk{font-family:var(--f-ui);font-weight:700;padding:0 2px}
+.passage .mk.cur{background:var(--ink);color:var(--sheet-bg);border-radius:3px}
+.stem .blank{min-width:2.6em}
 .foot{font-size:12px;color:var(--muted);margin-top:22px;line-height:1.7}
 @media (prefers-reduced-motion: reduce){.bub,.prog i{transition:none}}
 </style>
@@ -145,20 +156,16 @@ h1{font-family:var(--f-paper);font-size:24px;margin:24px 0 4px;text-wrap:balance
 <div class="overlay" id="overlay" hidden></div>
 
 <script>
-let LANG, LISTEN, S;
-let CATALOG = null, TEST = null;
-
-function initState(){ S = {name:"", cohort:"", view:"home", idx:0, lang:Array(LANG.items.length).fill(0), listen:0,
-  done:{lang:false,listen:false}, timerEnd:0, timerId:0, confirm:false, ex:{}, playing:false}; }
-
-const $ = id => document.getElementById(id);
-const esc = s => s;
-const N = ["１","２","３","４"];
-
-function setHeader(name, showSheet){
-  $("secName").textContent = name;
-  $("openSheet").hidden = !showSheet;
+let SECS, LISTEN, S, SEC;
+let CATALOG = null, TEST = null, VERSION = "";
+function initState(){
+  S = {name:"", view:"home", idx:0, ans:{}, done:{}, listen:0, timerEnd:0, timerId:0, ex:{}, playing:false};
+  SECS.forEach(sec => { S.ans[sec.id] = Array(sec.items.length).fill(0); S.done[sec.id] = false; });
+  S.done.listen = false;
 }
+const $ = id => document.getElementById(id);
+const who = () => S.name || "No name";
+function setHeader(name, showSheet){ $("secName").textContent = name; $("openSheet").hidden = !showSheet; }
 
 /* ---------- timer ---------- */
 function startTimer(min, onEnd){
@@ -174,31 +181,28 @@ function startTimer(min, onEnd){
   };
   tick(); S.timerId = setInterval(tick, 500);
 }
-function stopTimer(){ clearInterval(S.timerId); $("timer").hidden = true; }
+function stopTimer(){ clearInterval(S.timerId); S.timerId = 0; $("timer").hidden = true; }
 
 /* ---------- mark-sheet row ---------- */
-function rowHTML(no, val, onKey, opts={}){
+function rowHTML(no, val, key, opts={}){
   const n = opts.n || 4;
   let b = "";
   for(let i=1;i<=n;i++){
     const right = opts.correct===i ? " is-right" : "";
-    b += `<button class="bub${right}" role="radio" aria-checked="${val===i}" aria-label="${no}番 ${i}" data-k="${onKey}" data-v="${i}" ${opts.lock?"disabled":""}><span class="ov">${i}</span></button>`;
+    b += `<button class="bub${right}" role="radio" aria-checked="${val===i}" aria-label="${no}番 ${i}" data-k="${key}" data-v="${i}" ${opts.lock?"disabled":""}><span class="ov">${i}</span></button>`;
   }
   return `<div class="row" role="radiogroup" aria-label="問題 ${no}"><span class="no">${no}</span><div class="bubs">${b}</div></div>`;
 }
+function getAns(k){ if(k==="listen") return S.listen; const [sid,i]=k.split(":"); return S.ans[sid] ? S.ans[sid][+i] : 0; }
+function setAns(k,v){ if(k==="listen"){ S.listen=v; return; } const [sid,i]=k.split(":"); if(S.ans[sid]) S.ans[sid][+i]=v; }
 document.addEventListener("click", e => {
   const b = e.target.closest(".bub"); if(!b || b.disabled) return;
   const k = b.dataset.k, v = +b.dataset.v;
-  if(k === "listen"){ S.listen = S.listen===v ? 0 : v; }
-  else { const i = +k; S.lang[i] = S.lang[i]===v ? 0 : v; }
+  setAns(k, getAns(k)===v ? 0 : v);
   refreshBubbles();
 });
 function refreshBubbles(){
-  document.querySelectorAll(".bub").forEach(b => {
-    const k = b.dataset.k, v = +b.dataset.v;
-    const cur = k==="listen" ? S.listen : S.lang[+k];
-    b.setAttribute("aria-checked", cur===v);
-  });
+  document.querySelectorAll(".bub:not([disabled])").forEach(b => b.setAttribute("aria-checked", getAns(b.dataset.k)===+b.dataset.v));
 }
 
 /* ---------- home ---------- */
@@ -213,72 +217,78 @@ function levelCard(){
 function home(){
   stopTimer(); stopAudio(); S.view="home"; setHeader(`JLPT ${TEST.level} 模擬試験`, false);
   $("strip").hidden = true;
-  const answered = S.lang.filter(Boolean).length;
+  const secCards = SECS.map(sec => {
+    const answered = S.ans[sec.id].filter(Boolean).length;
+    return `<div class="card">
+      <h3>${sec.name}</h3>
+      <p>${sec.desc || ""}</p>
+      <div class="meta">${sec.items.length}問 ・ ${sec.minutes}分（本番と 同じ）</div>
+      <div><button class="btn" data-sec="${sec.id}">${S.done[sec.id]?"結果を見る":(answered?"つづける":"はじめる")}</button></div>
+    </div>`;}).join("");
   $("app").innerHTML = `
     <h1>JLPT ${TEST.level} ${TEST.title}</h1>
     <p class="lead">本番と同じように、マークシートの ①②③④ をタップして ぬります。もう一度タップすると けせます。</p>
     ${levelCard()}
     <div class="card">
       <h3>なまえ</h3>
-      <div class="who">
-        <label for="nm">なまえ（ローマ字でも いいです）<input id="nm" autocomplete="name" value="${S.name.replace(/"/g,"&quot;")}"></label>
-        <label for="ch">期<input id="ch" inputmode="numeric" placeholder="15" value="${S.cohort.replace(/"/g,"&quot;")}"></label>
-      </div>
-      <p class="err" id="whoErr" hidden>なまえと 期を 入れてから はじめてください。</p>
+      <label class="one-field" for="nm">なまえ（ローマ字でも いいです。入れなくても できます）<input id="nm" autocomplete="name" value="${S.name.replace(/"/g,"&quot;")}"></label>
     </div>
+    ${secCards}
     <div class="card">
-      <h3>言語知識（文字・語彙）</h3>
-      <p>模擬試験 第1回の 文字・語彙（もんだい1〜5）、ぜんぶで 28問。本番モードなので、こたえは さいごに まとめて 見ます。</p>
-      <div class="meta">28問 ・ 25分（本番と 同じ）</div>
-      <div><button class="btn" id="goLang">${S.done.lang?"結果を見る":(answered?"つづける":"はじめる")}</button></div>
-    </div>
-    <div class="card">
-      <h3>聴解　もんだい1（課題理解）</h3>
-      <p>チャイム・間・解答時間12秒まで、本番と同じ流れで 1回だけ ながれます。とちゅうで とめられません。イヤホンを つかってください。</p>
-      <div class="meta">1問 ・ 約1分10秒</div>
+      <h3>${LISTEN.name}</h3>
+      <p>${LISTEN.desc || ""}</p>
+      <div class="meta">${LISTEN.meta || ""}</div>
       <div><button class="btn" id="goListen">${S.done.listen?"結果を見る":"はじめる"}</button></div>
     </div>
     <p class="foot">試験運用版です。問題は IJFA トレーニングセンターの オリジナルです。聴解の 音声は 音声合成で 作っています。</p>`;
-  const who = () => {
-    S.name = $("nm").value.trim(); S.cohort = $("ch").value.trim();
-    try{ localStorage.setItem("n4who", JSON.stringify({n:S.name,c:S.cohort})); }catch(e){}
-    const ok = S.name && S.cohort; $("whoErr").hidden = !!ok; if(!ok) $("nm").focus(); return ok;
-  };
-  $("goLang").onclick = () => { if(!who()) return; S.done.lang ? result("lang") : lang(S.idx); };
-  $("goListen").onclick = () => { if(!who()) return; S.done.listen ? result("listen") : listen(); };
+  const saveName = () => { S.name = $("nm").value.trim(); try{ localStorage.setItem("jlptName", S.name); }catch(e){} };
+  $("app").querySelectorAll("[data-sec]").forEach(b => b.onclick = () => {
+    saveName(); SEC = SECS.find(s=>s.id===b.dataset.sec);
+    S.done[SEC.id] ? result(SEC.id) : (S.idx=0, question(S.ans[SEC.id].findIndex(v=>!v) > 0 ? S.ans[SEC.id].findIndex(v=>!v) : 0));
+  });
+  $("goListen").onclick = () => { saveName(); S.done.listen ? result("listen") : listen(); };
 }
 
-/* ---------- language section ---------- */
-function lang(i){
-  S.view="lang"; S.idx=i; S.confirm=false;
-  setHeader(LANG.name, true);
-  if(!S.timerId || $("timer").hidden) startTimer(LANG.minutes, () => submitLang(true));
-  const q = LANG.items[i];
-  const prevM = i>0 ? LANG.items[i-1].m : "";
-  const two = !q.one;
+/* ---------- paper (one question) ---------- */
+function passageHTML(pid, cur){
+  const p = SEC.passages && SEC.passages[pid]; if(!p) return "";
+  const html = p.replace(/\{(Q\d+)\}/g, (m, k) => { const n = +k.slice(1); return `<span class="mk${n===cur?" cur":""}">［${n}］</span>`; })
+                ;
+  const body = /<table|<p/.test(html) ? html : html.replace(/\n/g, "<br>");
+  return `<div class="passage">${body}</div>`;
+}
+function question(i){
+  S.view="q"; S.idx=i;
+  setHeader(SEC.name, true);
+  if(!S.timerId) startTimer(SEC.minutes, () => submitSec(true));
+  const q = SEC.items[i], no = i+1;
+  const prev = i>0 ? SEC.items[i-1] : null;
+  const showIns = !prev || prev.m !== q.m || q.passage;
   $("app").innerHTML = `
     <section class="paper" aria-label="もんだいようし">
-      ${q.m!==prevM||true ? `<div class="mondai"><b>${q.m.split("　")[1]}</b><p>${q.ins}</p></div>` : ""}
-      <div class="stem"><span class="qnum">${i+1}</span>${q.stem}</div>
-      <div class="choices ${two?"":"one"}">${q.ch.map((c,k)=>`<div><span class="n">${k+1}</span><span>${c}</span></div>`).join("")}</div>
+      ${showIns ? `<div class="mondai"><b>${q.m.split("　")[1]}</b><p>${q.ins}</p></div>` : ""}
+      ${q.passage ? passageHTML(q.passage, no) : ""}
+      <div class="stem"><span class="qnum">${no}</span>${q.stem || ""}</div>
+      <div class="choices ${q.one?"one":""}">${q.ch.map((c,k)=>`<div><span class="n">${k+1}</span><span>${c}</span></div>`).join("")}</div>
       <p class="note">${q.m}</p>
     </section>`;
   $("strip").hidden = false;
   $("stripIn").innerHTML = `
-    <div class="sheetlabel"><span>かいとうようし　Answer Sheet</span><span>${i+1} / ${LANG.items.length}</span></div>
-    ${rowHTML(i+1, S.lang[i], i)}
+    <div class="sheetlabel"><span>かいとうようし　Answer Sheet</span><span>${no} / ${SEC.items.length}</span></div>
+    ${rowHTML(no, S.ans[SEC.id][i], SEC.id+":"+i)}
     <div class="nav">
       <button class="btn ghost small" id="prev" ${i===0?"disabled":""}>まえへ</button>
       <span class="mid"></span>
-      ${i<LANG.items.length-1 ? `<button class="btn small" id="next">つぎへ</button>` : `<button class="btn small" id="fin">おわる</button>`}
+      ${i<SEC.items.length-1 ? `<button class="btn small" id="next">つぎへ</button>` : `<button class="btn small" id="fin">おわる</button>`}
     </div>`;
-  $("prev").onclick = () => lang(i-1);
-  if($("next")) $("next").onclick = () => lang(i+1);
+  $("prev").onclick = () => question(i-1);
+  if($("next")) $("next").onclick = () => question(i+1);
   if($("fin")) $("fin").onclick = askFinish;
   window.scrollTo(0,0);
+  const cur = document.querySelector(".mk.cur"); if(cur) cur.scrollIntoView({block:"center"});
 }
 function askFinish(){
-  const empty = S.lang.map((v,i)=>v?0:i+1).filter(Boolean);
+  const empty = S.ans[SEC.id].map((v,i)=>v?0:i+1).filter(Boolean);
   const box = document.createElement("div");
   box.className = "confirm";
   box.innerHTML = `<p>${empty.length?`まだ ぬっていない 問題が あります：${empty.join("・")}。`:"ぜんぶ ぬりました。"}おわって 答えあわせを しますか。</p>
@@ -286,64 +296,68 @@ function askFinish(){
   const old = $("app").querySelector(".confirm"); if(old) old.remove();
   $("app").appendChild(box);
   $("cNo").onclick = () => box.remove();
-  $("cYes").onclick = () => submitLang(false);
+  $("cYes").onclick = () => submitSec(false);
   box.scrollIntoView({behavior:"smooth",block:"center"});
 }
-function submitLang(timeUp){ stopTimer(); S.done.lang = true; closeSheet(); result("lang", timeUp); }
+function submitSec(timeUp){ stopTimer(); S.done[SEC.id] = true; closeSheet(); result(SEC.id, timeUp); }
 
 /* ---------- overview answer sheet ---------- */
 $("openSheet").onclick = openSheet;
 function openSheet(){
+  if(S.view!=="q") return;
   const ov = $("overlay");
-  if(S.view==="lang"){
-    ov.innerHTML = `<div class="sheetpanel" role="dialog" aria-label="解答用紙">
+  ov.innerHTML = `<div class="sheetpanel" role="dialog" aria-label="解答用紙">
       <div class="head"><h2>かいとうようし</h2><button class="btn ghost small" id="close">とじる</button></div>
       <p class="lead" style="margin:0">ここでも ぬれます。番号を おすと その問題へ いきます。</p>
-      <div class="grid">${LANG.items.map((q,i)=>`<div style="display:flex;gap:8px;align-items:center"><button class="btn ghost small" data-go="${i}" style="min-width:3.2em">${i+1}</button>${rowHTML(i+1,S.lang[i],i).replace('<span class="no">'+(i+1)+'</span>','')}</div>`).join("")}</div>
+      <div class="grid">${SEC.items.map((q,i)=>`<div style="display:flex;gap:8px;align-items:center"><button class="btn ghost small" data-go="${i}" style="min-width:3.2em">${i+1}</button>${rowHTML(i+1,S.ans[SEC.id][i],SEC.id+":"+i).replace('<span class="no">'+(i+1)+'</span>','')}</div>`).join("")}</div>
     </div>`;
-  } else { return; }
   ov.hidden = false;
   $("close").onclick = closeSheet;
-  ov.onclick = e => { if(e.target===ov) closeSheet(); const g=e.target.closest("[data-go]"); if(g){ closeSheet(); lang(+g.dataset.go); } };
+  ov.onclick = e => { if(e.target===ov) closeSheet(); const g=e.target.closest("[data-go]"); if(g){ closeSheet(); question(+g.dataset.go); } };
 }
-function closeSheet(){ $("overlay").hidden = true; $("overlay").innerHTML=""; if(S.view==="lang") refreshBubbles(); }
+function closeSheet(){ $("overlay").hidden = true; $("overlay").innerHTML=""; refreshBubbles(); }
 
 /* ---------- results ---------- */
 function exHTML(key, ja, id){
-  const lang = S.ex[key] || "ja";
-  return `<div class="tabs"><button aria-pressed="${lang==="ja"}" data-ex="${key}" data-l="ja">日本語</button><button aria-pressed="${lang==="id"}" data-ex="${key}" data-l="id">Bahasa Indonesia</button></div>
-  <div class="ex ${lang==="id"?"id":""}">${lang==="ja"?ja:id}</div>`;
+  const l = S.ex[key] || "ja";
+  return `<div class="tabs"><button aria-pressed="${l==="ja"}" data-ex="${key}" data-l="ja">日本語</button><button aria-pressed="${l==="id"}" data-ex="${key}" data-l="id">Bahasa Indonesia</button></div>
+  <div class="ex ${l==="id"?"id":""}">${l==="ja"?ja:id}</div>`;
 }
 document.addEventListener("click", e => {
   const t = e.target.closest("[data-ex]"); if(!t) return;
-  S.ex[t.dataset.ex] = t.dataset.l; result(S.view==="result-listen"?"listen":"lang");
+  S.ex[t.dataset.ex] = t.dataset.l; const y = window.scrollY; result(S.view==="result-listen"?"listen":SEC.id); window.scrollTo(0,y);
 });
-function result(which, timeUp){
-  stopTimer(); $("strip").hidden = true;
-  if(which==="lang"){
-    S.view="result-lang"; setHeader("結果　"+LANG.name, false);
-    const ok = LANG.items.filter((q,i)=>S.lang[i]===q.a).length;
-    $("app").innerHTML = `
-      <h1>答えあわせ</h1>
-      ${timeUp?`<p class="lead">時間に なりました。ぬった ところまでで 採点しました。</p>`:""}
-      <div class="card"><div class="score">${ok}<small> / ${LANG.items.length}問</small></div>
-        <p>本番では、言語知識（文字・語彙・文法）と読解を あわせて 120点中 38点が 基準点です。この 28問は 文字・語彙だけなので、点数は 目安です。</p></div>
-      ${LANG.items.map((q,i)=>{
-        const me=S.lang[i], good=me===q.a;
-        return `<div class="rv"><div class="top"><span class="qnum">${i+1}</span><span class="pill ${good?"ok":"ng"}">${good?"せいかい":"まちがい"}</span><span class="meta" style="font-size:12.5px;color:var(--muted)">${q.m}</span></div>
-          <div class="stemsm">${q.stem}</div>
-          ${rowHTML(i+1, me, "r"+i, {lock:true, correct:q.a})}
-          <div class="meta" style="font-size:13px">こたえ：${q.a} ${q.ch[q.a-1]}　／　あなた：${me?me+" "+q.ch[me-1]:"ぬっていない"}</div>
-          ${exHTML("l"+i, q.ja, q.id)}</div>`;}).join("")}
-      <div class="card save"><h3>結果を ほぞんする</h3>
+const SAVE_HTML = `<div class="card save"><h3>結果を ほぞんする</h3>
         <p>画像（PNG）で ほぞんして、先生に おくってください。</p>
         <div><button class="btn" id="dl">画像を ダウンロード</button></div>
         <img id="pv" alt="結果の画像">
-        <p class="meta">ダウンロードできないときは、上の画像を 長おしして ほぞんしてください。</p></div>
+        <p class="meta">ダウンロードできないときは、上の画像を 長おしして ほぞんしてください。</p></div>`;
+function result(which, timeUp){
+  stopTimer(); $("strip").hidden = true;
+  if(which!=="listen"){
+    SEC = SECS.find(s=>s.id===which);
+    S.view="result"; setHeader("結果　"+SEC.name, false);
+    const A = S.ans[SEC.id];
+    const ok = SEC.items.filter((q,i)=>A[i]===q.a).length;
+    const shown = new Set();
+    $("app").innerHTML = `
+      <h1>答えあわせ</h1>
+      ${timeUp?`<p class="lead">時間に なりました。ぬった ところまでで 採点しました。</p>`:""}
+      <div class="card"><div class="score">${ok}<small> / ${SEC.items.length}問</small></div>
+        <p>${SEC.note || ""}</p></div>
+      ${SEC.items.map((q,i)=>{
+        const me=A[i], good=me===q.a;
+        const pas = q.passage && !shown.has(q.passage) ? (shown.add(q.passage), passageHTML(q.passage, -1)) : "";
+        return `${pas}<div class="rv"><div class="top"><span class="qnum">${i+1}</span><span class="pill ${good?"ok":"ng"}">${good?"せいかい":"まちがい"}</span><span class="meta" style="font-size:12.5px;color:var(--muted)">${q.m}</span></div>
+          ${q.stem?`<div class="stemsm">${q.stem}</div>`:""}
+          ${rowHTML(i+1, me, "r"+i, {lock:true, correct:q.a})}
+          <div class="meta" style="font-size:13px">こたえ：${q.a} ${q.ch[q.a-1]}　／　あなた：${me?me+" "+q.ch[me-1]:"ぬっていない"}</div>
+          ${exHTML(SEC.id+i, q.ja, q.id)}</div>`;}).join("")}
+      ${SAVE_HTML}
       <div class="nav" style="margin-top:8px"><button class="btn ghost" id="back">もどる</button><button class="btn ghost" id="again">もう一度</button></div>`;
-    setupSave("lang");
+    setupSave(SEC.id);
     $("back").onclick = home;
-    $("again").onclick = () => { S.lang = Array(LANG.items.length).fill(0); S.done.lang=false; S.idx=0; lang(0); };
+    $("again").onclick = () => { S.ans[SEC.id] = Array(SEC.items.length).fill(0); S.done[SEC.id]=false; question(0); };
   } else {
     S.view="result-listen"; setHeader("結果　聴解", false);
     const me=S.listen, good=me===LISTEN.a;
@@ -358,16 +372,12 @@ function result(which, timeUp){
         <div class="script">${LISTEN.script.map(([s,t])=>`<div>${s?`<span class="sp">${s}</span>`:""}${t}</div>`).join("")}</div>
         <div><button class="btn ghost small" id="replay">もう一度 聞く</button></div>
         <div class="phase" id="phase2"></div></div>
-      <div class="card save"><h3>結果を ほぞんする</h3>
-        <p>画像（PNG）で ほぞんして、先生に おくってください。</p>
-        <div><button class="btn" id="dl">画像を ダウンロード</button></div>
-        <img id="pv" alt="結果の画像">
-        <p class="meta">ダウンロードできないときは、上の画像を 長おしして ほぞんしてください。</p></div>
+      ${SAVE_HTML}
       <div class="nav" style="margin-top:8px"><button class="btn ghost" id="back">もどる</button><button class="btn ghost" id="again">もう一度 ためす</button></div>`;
     setupSave("listen");
     $("back").onclick = home;
     $("again").onclick = () => { S.listen=0; S.done.listen=false; listen(); };
-    $("replay").onclick = () => { stopAudio(); playTimeline(()=>{}, (ph)=>{ $("phase2").innerHTML = `<b>${ph}</b>`; }); };
+    $("replay").onclick = () => { stopAudio(); playTimeline(()=>{}, (ph)=>{ $("phase2").innerHTML = `<b>${ph}</b>`; }, msg => { $("phase2").innerHTML = `<b>${msg}</b>`; }); };
   }
   window.scrollTo(0,0);
 }
@@ -392,12 +402,14 @@ function listen(){
   $("quit").onclick = home;
   $("lfin").onclick = () => { S.done.listen = true; result("listen"); };
   $("play").onclick = () => {
-    $("play").disabled = true; $("play").textContent = "ながれています";
+    $("play").disabled = true; $("play").textContent = "じゅんびしています";
     playTimeline(() => { $("lfin").disabled = false; $("phase").innerHTML = `<b>おわりです。</b><span>答えあわせを おしてください</span>`; $("bar").style.width="100%"; },
       (ph, left, frac) => {
+        $("play").textContent = "ながれています";
         $("phase").innerHTML = `<b>${ph}</b><span>${left!=null?"あと "+left+" 秒":""}</span>`;
         $("bar").style.width = Math.round(frac*100)+"%";
-      });
+      },
+      msg => { $("phase").innerHTML = `<b>${msg}</b>`; $("play").disabled = false; $("play").textContent = "もう一度 ためす"; });
   };
 }
 
@@ -406,15 +418,16 @@ let ctx = null, buffers = null, sources = [], uiTimer = 0;
 async function loadBuffers(){
   if(buffers) return buffers;
   ctx = ctx || new (window.AudioContext||window.webkitAudioContext)();
-  buffers = {};
+  const tmp = {};
   const names = [...new Set(LISTEN.timeline.map(s=>s.f))];
   for(const k of names){
     const res = await fetch(`audio/${k}.mp3?v=${encodeURIComponent(VERSION)}`);
     if(!res.ok) throw new Error("audio " + k);
     const ab = await res.arrayBuffer();
     const buf = await new Promise((ok,ng)=>ctx.decodeAudioData(ab, ok, ng));
-    buffers[k] = {buf, ...edges(buf, k.includes("chime"))};
+    tmp[k] = {buf, ...edges(buf, k.includes("chime"))};
   }
+  buffers = tmp;
   return buffers;
 }
 function edges(buf, keepTail){
@@ -426,10 +439,15 @@ function edges(buf, keepTail){
   s = Math.max(0, s-pad); e = keepTail ? d.length-1 : Math.min(d.length-1, e+pad);
   return {off:s/sr, dur:(e-s)/sr};
 }
-async function playTimeline(onEnd, onPhase){
-  ctx = ctx || new (window.AudioContext||window.webkitAudioContext)();
-  await ctx.resume();
-  await loadBuffers();
+async function playTimeline(onEnd, onPhase, onError){
+  try{
+    ctx = ctx || new (window.AudioContext||window.webkitAudioContext)();
+    await ctx.resume();
+    await loadBuffers();
+  }catch(e){
+    if(onError) onError("音声を 読みこめませんでした。すこし まってから、ページを 読みこみなおして ください。");
+    return;
+  }
   stopAudio();
   let t = ctx.currentTime + 0.4;
   const t0 = t, marks = [];
@@ -464,14 +482,14 @@ function stamp(){
   return {txt:`${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`,
           file:`${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}`};
 }
-const plain = h => h.replace(/<[^>]+>/g,"").replace(/\s+/g," ").trim();
 async function drawResult(which){
   try{ await document.fonts.ready; }catch(e){}
-  const rows = which==="lang"
-    ? LANG.items.map((q,i)=>({no:String(i+1), kind:q.m.replace("　"," "), me:S.lang[i], a:q.a}))
+  const sec = which==="listen" ? null : SECS.find(s=>s.id===which);
+  const rows = sec
+    ? sec.items.map((q,i)=>({no:String(i+1), kind:q.m.replace("　"," "), me:S.ans[sec.id][i], a:q.a}))
     : [{no:"1番", kind:"聴解 もんだい1（課題理解）", me:S.listen, a:LISTEN.a}];
   const ok = rows.filter(r=>r.me===r.a).length;
-  const W=1080, rowH=76, top=430, H=top+rows.length*rowH+150;
+  const W=1080, rowH=76, top=400, H=top+rows.length*rowH+150;
   const c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
   const M='"BIZ UDMincho","Hiragino Mincho ProN",serif', G='"BIZ UDPGothic","Hiragino Sans",sans-serif';
   g.fillStyle="#ffffff"; g.fillRect(0,0,W,H);
@@ -479,9 +497,9 @@ async function drawResult(which){
   g.fillStyle="#1c2125"; g.textBaseline="alphabetic";
   g.font=`700 44px ${M}`; g.fillText(`JLPT ${TEST.level} 模擬試験　結果`, 64, 110);
   g.font=`400 30px ${G}`; g.fillStyle="#5b646c";
-  g.fillText(which==="lang"?LANG.name:"聴解", 64, 160);
+  g.fillText(sec ? sec.name : "聴解", 64, 160);
   g.fillStyle="#1c2125"; g.font=`700 36px ${G}`;
-  g.fillText(`${S.name}　（${S.cohort}期）`, 64, 236);
+  g.fillText(who(), 64, 236);
   g.font=`400 28px ${G}`; g.fillStyle="#5b646c"; g.fillText(stamp().txt, 64, 284);
   g.fillStyle="#1c2125"; g.font=`700 96px ${G}`; const sc=String(ok); g.fillText(sc, W-330, 250);
   const sw=g.measureText(sc).width; g.font=`400 36px ${G}`; g.fillStyle="#5b646c"; g.fillText(` / ${rows.length}問`, W-330+sw, 250);
@@ -507,29 +525,27 @@ async function setupSave(which){
   const pv = $("pv"); if(pv) pv.src = url;
   const b = $("dl"); if(!b) return;
   b.onclick = () => {
-    const safe = (S.name||"name").replace(/[\\/:*?"<>|\s]+/g,"_");
+    const safe = who().replace(/[\\/:*?"<>|\s]+/g,"_");
     const a = document.createElement("a");
-    a.href = url; a.download = `JLPT-${TEST.level}_${which==="lang"?"gengo":"choukai"}_${safe}_${stamp().file}.png`;
+    a.href = url; a.download = `JLPT-${TEST.level}_${which}_${safe}_${stamp().file}.png`;
     document.body.appendChild(a); a.click(); a.remove();
   };
 }
 
-let VERSION = "";
 async function boot(){
   try{
     CATALOG = await (await fetch("catalog.json?t=" + Date.now())).json();
     const all = CATALOG.levels.flatMap(l => l.tests.map(t => ({...t, level:l.level})));
     const want = new URLSearchParams(location.search).get("t");
     TEST = all.find(t => t.id === want) || all.find(t => t.level === "N4") || all[0];
-    const res = await fetch(TEST.id + ".json?t=" + Date.now());
-    const data = await res.json();
-    LANG = data.vocab; LISTEN = data.listen; VERSION = data.version || "";
+    const data = await (await fetch(TEST.id + ".json?t=" + Date.now())).json();
+    SECS = data.sections; LISTEN = data.listen; VERSION = data.version || "";
   }catch(e){
     $("app").innerHTML = '<p class="lead" style="margin-top:24px">問題を 読みこめませんでした。インターネットの 接続を たしかめて、ページを 読みこみなおして ください。</p>';
     return;
   }
   initState();
-  try{ const w = JSON.parse(localStorage.getItem("n4who")||"null"); if(w){ S.name=w.n||""; S.cohort=w.c||""; } }catch(e){}
+  try{ S.name = localStorage.getItem("jlptName") || ""; }catch(e){}
   home();
 }
 boot();
