@@ -1,0 +1,7 @@
+{
+ "levels": [
+  {"level": "N5", "tests": []},
+  {"level": "N4", "tests": [{"id": "n4-mock01", "title": "模擬試験 第1回", "note": "文字・語彙 28問 ＋ 聴解 おためし1問"}]},
+  {"level": "N3", "tests": []}
+ ]
+}

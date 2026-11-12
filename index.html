@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JLPT 模擬試験｜IJFA</title>
+<meta name="description" content="JLPT の模擬試験（N5〜N3）。マークシート形式で、本番と同じ時間・流れで練習できます。IJFA トレーニングセンター作成。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=BIZ+UDMincho:wght@400;700&display=swap">
+<style>
+*{box-sizing:border-box}
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font-family:system-ui,sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+/* Layout: one narrow exam-paper column; question paper above, the answer-sheet row pinned to the bottom like a strip torn from the real sheet. */
+:root{
+  --paper:#f6f7f5; --sheet-bg:#ffffff; --ink:#1c2125; --muted:#5b646c; --rule:#d5dad6;
+  --sheet:#1c2125; --sheet-soft:#eceeec; --accent:#22385a; --accent-ink:#ffffff;
+  --ok:#2e7a4e; --ng:#b3261e; --ok-soft:#e3f1e8; --ng-soft:#f8e2e0;
+  --f-paper:"BIZ UDMincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --f-ui:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#15191c; --sheet-bg:#1d2226; --ink:#e7eae8; --muted:#a3acb3; --rule:#343b40;
+  --sheet:#e7eae8; --sheet-soft:#262c30; --accent:#9db7e0; --accent-ink:#0f1720;
+  --ok:#7fc79c; --ng:#f2948c; --ok-soft:#1e3326; --ng-soft:#3d2220; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#15191c; --sheet-bg:#1d2226; --ink:#e7eae8; --muted:#a3acb3; --rule:#343b40;
+  --sheet:#e7eae8; --sheet-soft:#262c30; --accent:#9db7e0; --accent-ink:#0f1720;
+  --ok:#7fc79c; --ng:#f2948c; --ok-soft:#1e3326; --ng-soft:#3d2220; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--sheet-bg)}
+.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 140px}
+header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--sheet-bg);border-bottom:1px solid var(--rule)}
+header.bar .in{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:10px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sec{font-weight:700;font-size:14px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer{font-variant-numeric:tabular-nums;font-size:14px;color:var(--muted)}
+.timer.low{color:var(--ng);font-weight:700}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:10px 16px;font-weight:700}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn:focus-visible,.bub:focus-visible,.row:focus-visible{outline:3px solid var(--sheet);outline-offset:2px}
+.small{padding:6px 10px;font-size:13px}
+
+/* question paper */
+.paper{font-family:var(--f-paper);background:var(--sheet-bg);border:1px solid var(--rule);border-radius:4px;padding:18px 16px;margin-top:16px}
+.mondai{display:flex;gap:10px;align-items:baseline;margin-bottom:12px}
+.mondai b{border:1.5px solid var(--ink);padding:0 8px;font-size:15px;white-space:nowrap}
+.mondai p{margin:0;font-size:14px;line-height:1.8}
+.qnum{font-family:var(--f-ui);font-weight:700;display:inline-block;min-width:1.6em;border:1.5px solid var(--ink);text-align:center;margin-right:8px;font-size:13px;line-height:1.5}
+.stem{font-size:19px;line-height:2.1;margin:6px 0 14px;word-break:keep-all;overflow-wrap:anywhere}
+.stem u{text-decoration-thickness:1.5px;text-underline-offset:6px}
+.star{font-family:var(--f-ui)}
+.word{display:inline-block;border:1.5px solid var(--ink);padding:0 12px;font-size:20px}
+.blank{display:inline-block;min-width:3.2em;border-bottom:1.5px solid var(--ink);text-align:center;margin:0 2px}
+.choices{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:17px}
+.choices.one{display:grid;grid-template-columns:1fr}
+.choices div{display:flex;gap:8px;min-width:0}
+.choices span.n{font-family:var(--f-ui);font-weight:700}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px}
+
+/* answer-sheet strip */
+.strip{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--sheet-bg);border-top:2px solid var(--sheet);padding-bottom:env(safe-area-inset-bottom,0px)}
+.strip .in{max-width:560px;margin:0 auto;padding-block:10px 12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:10px}
+.sheetlabel{display:flex;justify-content:space-between;font-size:11.5px;color:var(--sheet);letter-spacing:.08em}
+.row{display:flex;align-items:center;gap:10px;background:transparent;border:0;padding:0;width:100%;color:inherit}
+.row .no{width:2.2em;text-align:center;font-weight:700;color:var(--sheet);border:1.5px solid var(--sheet);font-size:13px;font-variant-numeric:tabular-nums}
+.bubs{display:flex;gap:6px;flex:1;justify-content:center}
+.bub{width:48px;height:52px;border:0;background:transparent;padding:0;display:grid;place-items:center;border-radius:8px}
+.bub .ov{width:22px;height:40px;border-radius:50%;border:1.5px solid var(--sheet);color:var(--sheet);font-family:var(--f-paper);font-size:13px;display:grid;place-items:center;transition:background .12s}
+.bub[aria-checked="true"] .ov{background:var(--ink);border-color:var(--ink);color:transparent}
+.bub.is-right .ov{box-shadow:0 0 0 3px var(--ok)}
+.nav{display:flex;gap:8px;justify-content:space-between}
+.nav .mid{flex:1}
+
+/* overview sheet */
+.overlay{position:fixed;inset:0;z-index:20;background:rgb(0 0 0 / .4);display:grid;align-items:end}
+.sheetpanel{background:var(--sheet-bg);max-height:85%;overflow:auto;border-radius:14px 14px 0 0;padding-block:16px calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sheetpanel h2{font-size:15px;margin:0 0 4px;color:var(--sheet);letter-spacing:.1em}
+.sheetpanel .grid{display:grid;gap:10px;margin:12px 0 16px;max-width:520px;margin-inline:auto}
+.sheetpanel .head{display:flex;gap:8px;justify-content:space-between;align-items:center}
+
+/* home / result */
+h1{font-family:var(--f-paper);font-size:24px;margin:24px 0 4px;text-wrap:balance}
+.lead{color:var(--muted);margin:0 0 18px;font-size:14px}
+.card{background:var(--sheet-bg);border:1px solid var(--rule);border-radius:8px;padding:16px;display:grid;gap:8px;margin-bottom:12px}
+.card h3{margin:0;font-size:16px}
+.card p{margin:0;color:var(--muted);font-size:13.5px}
+.card .meta{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.score{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.score small{font-size:16px;color:var(--muted);font-weight:400}
+.rv{border:1px solid var(--rule);border-radius:8px;background:var(--sheet-bg);padding:14px;display:grid;gap:8px;margin-bottom:10px}
+.rv .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.ng{background:var(--ng-soft);color:var(--ng)}
+.rv .stemsm{font-family:var(--f-paper);font-size:16px;line-height:1.9;overflow-wrap:anywhere}
+.ex{font-size:13.5px;line-height:1.7}
+.ex .id{color:var(--muted)}
+.tabs{display:flex;gap:6px}
+.tabs button{border:1px solid var(--rule);background:transparent;color:var(--muted);border-radius:99px;padding:3px 10px;font-size:12px}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--sheet-bg);border-color:var(--ink)}
+
+/* listening */
+.player{margin-top:14px;display:grid;gap:10px}
+.prog{height:6px;background:var(--rule);border-radius:99px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--sheet);transition:width .25s linear}
+.phase{font-size:13.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums}
+.phase b{color:var(--ink)}
+.script{font-family:var(--f-paper);font-size:15px;line-height:1.9;display:grid;gap:4px}
+.script .sp{font-family:var(--f-ui);font-size:12px;color:var(--muted);margin-right:6px}
+.confirm{border:1.5px solid var(--sheet);background:var(--sheet-soft);border-radius:8px;padding:12px;display:grid;gap:10px;margin-top:14px}
+.confirm p{margin:0;font-size:14px}
+.confirm .nav{justify-content:flex-end}
+.who{display:grid;grid-template-columns:1fr 6.5em;gap:10px}
+.who label{display:grid;gap:4px;font-size:12.5px;color:var(--muted);min-width:0}
+.who input{font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%;box-sizing:border-box}
+.who input:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.err{color:var(--ng);font-size:13px;margin:0}
+.save{display:grid;gap:10px}
+.save img{width:100%;border:1px solid var(--rule);border-radius:6px}
+.lv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lvb{display:grid;gap:2px;text-align:center;padding:10px 6px;border:1.5px solid var(--rule);border-radius:8px;color:var(--ink);text-decoration:none;font-weight:700;font-size:18px}
+.lvb small{font-weight:400;font-size:11.5px;color:var(--muted)}
+.lvb.on{border-color:var(--ink);background:var(--sheet-soft)}
+.lvb.off{opacity:.5}
+.foot{font-size:12px;color:var(--muted);margin-top:22px;line-height:1.7}
+@media (prefers-reduced-motion: reduce){.bub,.prog i{transition:none}}
+</style>
+</head>
+<body>
+
+<header class="bar"><div class="in">
+  <div class="sec" id="secName">JLPT 模擬試験</div>
+  <div class="timer" id="timer" hidden></div>
+  <button class="btn ghost small" id="openSheet" hidden>解答用紙</button>
+</div></header>
+
+<main class="wrap" id="app"></main>
+<div class="strip" id="strip" hidden><div class="in" id="stripIn"></div></div>
+<div class="overlay" id="overlay" hidden></div>
+
+<script>
+let LANG, LISTEN, S;
+let CATALOG = null, TEST = null;
+
+function initState(){ S = {name:"", cohort:"", view:"home", idx:0, lang:Array(LANG.items.length).fill(0), listen:0,
+  done:{lang:false,listen:false}, timerEnd:0, timerId:0, confirm:false, ex:{}, playing:false}; }
+
+const $ = id => document.getElementById(id);
+const esc = s => s;
+const N = ["１","２","３","４"];
+
+function setHeader(name, showSheet){
+  $("secName").textContent = name;
+  $("openSheet").hidden = !showSheet;
+}
+
+/* ---------- timer ---------- */
+function startTimer(min, onEnd){
+  stopTimer();
+  S.timerEnd = Date.now() + min*60000;
+  const t = $("timer"); t.hidden = false;
+  const tick = () => {
+    const left = Math.max(0, S.timerEnd - Date.now());
+    const m = Math.floor(left/60000), s = Math.floor(left/1000)%60;
+    t.textContent = "のこり " + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+    t.classList.toggle("low", left < 60000);
+    if(left <= 0){ stopTimer(); onEnd(); }
+  };
+  tick(); S.timerId = setInterval(tick, 500);
+}
+function stopTimer(){ clearInterval(S.timerId); $("timer").hidden = true; }
+
+/* ---------- mark-sheet row ---------- */
+function rowHTML(no, val, onKey, opts={}){
+  const n = opts.n || 4;
+  let b = "";
+  for(let i=1;i<=n;i++){
+    const right = opts.correct===i ? " is-right" : "";
+    b += `<button class="bub${right}" role="radio" aria-checked="${val===i}" aria-label="${no}番 ${i}" data-k="${onKey}" data-v="${i}" ${opts.lock?"disabled":""}><span class="ov">${i}</span></button>`;
+  }
+  return `<div class="row" role="radiogroup" aria-label="問題 ${no}"><span class="no">${no}</span><div class="bubs">${b}</div></div>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest(".bub"); if(!b || b.disabled) return;
+  const k = b.dataset.k, v = +b.dataset.v;
+  if(k === "listen"){ S.listen = S.listen===v ? 0 : v; }
+  else { const i = +k; S.lang[i] = S.lang[i]===v ? 0 : v; }
+  refreshBubbles();
+});
+function refreshBubbles(){
+  document.querySelectorAll(".bub").forEach(b => {
+    const k = b.dataset.k, v = +b.dataset.v;
+    const cur = k==="listen" ? S.listen : S.lang[+k];
+    b.setAttribute("aria-checked", cur===v);
+  });
+}
+
+/* ---------- home ---------- */
+function levelCard(){
+  return `<div class="card"><h3>レベル</h3><div class="lv">${CATALOG.levels.map(l=>{
+      const t = l.tests[0];
+      if(!t) return `<span class="lvb off">${l.level}<small>じゅんびちゅう</small></span>`;
+      const on = TEST && TEST.level===l.level;
+      return `<a class="lvb${on?" on":""}" href="?t=${t.id}">${l.level}<small>${t.title}</small></a>`;
+    }).join("")}</div></div>`;
+}
+function home(){
+  stopTimer(); stopAudio(); S.view="home"; setHeader(`JLPT ${TEST.level} 模擬試験`, false);
+  $("strip").hidden = true;
+  const answered = S.lang.filter(Boolean).length;
+  $("app").innerHTML = `
+    <h1>JLPT ${TEST.level} ${TEST.title}</h1>
+    <p class="lead">本番と同じように、マークシートの ①②③④ をタップして ぬります。もう一度タップすると けせます。</p>
+    ${levelCard()}
+    <div class="card">
+      <h3>なまえ</h3>
+      <div class="who">
+        <label for="nm">なまえ（ローマ字でも いいです）<input id="nm" autocomplete="name" value="${S.name.replace(/"/g,"&quot;")}"></label>
+        <label for="ch">期<input id="ch" inputmode="numeric" placeholder="15" value="${S.cohort.replace(/"/g,"&quot;")}"></label>
+      </div>
+      <p class="err" id="whoErr" hidden>なまえと 期を 入れてから はじめてください。</p>
+    </div>
+    <div class="card">
+      <h3>言語知識（文字・語彙）</h3>
+      <p>模擬試験 第1回の 文字・語彙（もんだい1〜5）、ぜんぶで 28問。本番モードなので、こたえは さいごに まとめて 見ます。</p>
+      <div class="meta">28問 ・ 25分（本番と 同じ）</div>
+      <div><button class="btn" id="goLang">${S.done.lang?"結果を見る":(answered?"つづける":"はじめる")}</button></div>
+    </div>
+    <div class="card">
+      <h3>聴解　もんだい1（課題理解）</h3>
+      <p>チャイム・間・解答時間12秒まで、本番と同じ流れで 1回だけ ながれます。とちゅうで とめられません。イヤホンを つかってください。</p>
+      <div class="meta">1問 ・ 約1分10秒</div>
+      <div><button class="btn" id="goListen">${S.done.listen?"結果を見る":"はじめる"}</button></div>
+    </div>
+    <p class="foot">試験運用版です。問題は IJFA トレーニングセンターの オリジナルです。聴解の 音声は 音声合成で 作っています。</p>`;
+  const who = () => {
+    S.name = $("nm").value.trim(); S.cohort = $("ch").value.trim();
+    try{ localStorage.setItem("n4who", JSON.stringify({n:S.name,c:S.cohort})); }catch(e){}
+    const ok = S.name && S.cohort; $("whoErr").hidden = !!ok; if(!ok) $("nm").focus(); return ok;
+  };
+  $("goLang").onclick = () => { if(!who()) return; S.done.lang ? result("lang") : lang(S.idx); };
+  $("goListen").onclick = () => { if(!who()) return; S.done.listen ? result("listen") : listen(); };
+}
+
+/* ---------- language section ---------- */
+function lang(i){
+  S.view="lang"; S.idx=i; S.confirm=false;
+  setHeader(LANG.name, true);
+  if(!S.timerId || $("timer").hidden) startTimer(LANG.minutes, () => submitLang(true));
+  const q = LANG.items[i];
+  const prevM = i>0 ? LANG.items[i-1].m : "";
+  const two = !q.one;
+  $("app").innerHTML = `
+    <section class="paper" aria-label="もんだいようし">
+      ${q.m!==prevM||true ? `<div class="mondai"><b>${q.m.split("　")[1]}</b><p>${q.ins}</p></div>` : ""}
+      <div class="stem"><span class="qnum">${i+1}</span>${q.stem}</div>
+      <div class="choices ${two?"":"one"}">${q.ch.map((c,k)=>`<div><span class="n">${k+1}</span><span>${c}</span></div>`).join("")}</div>
+      <p class="note">${q.m}</p>
+    </section>`;
+  $("strip").hidden = false;
+  $("stripIn").innerHTML = `
+    <div class="sheetlabel"><span>かいとうようし　Answer Sheet</span><span>${i+1} / ${LANG.items.length}</span></div>
+    ${rowHTML(i+1, S.lang[i], i)}
+    <div class="nav">
+      <button class="btn ghost small" id="prev" ${i===0?"disabled":""}>まえへ</button>
+      <span class="mid"></span>
+      ${i<LANG.items.length-1 ? `<button class="btn small" id="next">つぎへ</button>` : `<button class="btn small" id="fin">おわる</button>`}
+    </div>`;
+  $("prev").onclick = () => lang(i-1);
+  if($("next")) $("next").onclick = () => lang(i+1);
+  if($("fin")) $("fin").onclick = askFinish;
+  window.scrollTo(0,0);
+}
+function askFinish(){
+  const empty = S.lang.map((v,i)=>v?0:i+1).filter(Boolean);
+  const box = document.createElement("div");
+  box.className = "confirm";
+  box.innerHTML = `<p>${empty.length?`まだ ぬっていない 問題が あります：${empty.join("・")}。`:"ぜんぶ ぬりました。"}おわって 答えあわせを しますか。</p>
+    <div class="nav"><button class="btn ghost small" id="cNo">もどる</button><button class="btn small" id="cYes">おわる</button></div>`;
+  const old = $("app").querySelector(".confirm"); if(old) old.remove();
+  $("app").appendChild(box);
+  $("cNo").onclick = () => box.remove();
+  $("cYes").onclick = () => submitLang(false);
+  box.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function submitLang(timeUp){ stopTimer(); S.done.lang = true; closeSheet(); result("lang", timeUp); }
+
+/* ---------- overview answer sheet ---------- */
+$("openSheet").onclick = openSheet;
+function openSheet(){
+  const ov = $("overlay");
+  if(S.view==="lang"){
+    ov.innerHTML = `<div class="sheetpanel" role="dialog" aria-label="解答用紙">
+      <div class="head"><h2>かいとうようし</h2><button class="btn ghost small" id="close">とじる</button></div>
+      <p class="lead" style="margin:0">ここでも ぬれます。番号を おすと その問題へ いきます。</p>
+      <div class="grid">${LANG.items.map((q,i)=>`<div style="display:flex;gap:8px;align-items:center"><button class="btn ghost small" data-go="${i}" style="min-width:3.2em">${i+1}</button>${rowHTML(i+1,S.lang[i],i).replace('<span class="no">'+(i+1)+'</span>','')}</div>`).join("")}</div>
+    </div>`;
+  } else { return; }
+  ov.hidden = false;
+  $("close").onclick = closeSheet;
+  ov.onclick = e => { if(e.target===ov) closeSheet(); const g=e.target.closest("[data-go]"); if(g){ closeSheet(); lang(+g.dataset.go); } };
+}
+function closeSheet(){ $("overlay").hidden = true; $("overlay").innerHTML=""; if(S.view==="lang") refreshBubbles(); }
+
+/* ---------- results ---------- */
+function exHTML(key, ja, id){
+  const lang = S.ex[key] || "ja";
+  return `<div class="tabs"><button aria-pressed="${lang==="ja"}" data-ex="${key}" data-l="ja">日本語</button><button aria-pressed="${lang==="id"}" data-ex="${key}" data-l="id">Bahasa Indonesia</button></div>
+  <div class="ex ${lang==="id"?"id":""}">${lang==="ja"?ja:id}</div>`;
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-ex]"); if(!t) return;
+  S.ex[t.dataset.ex] = t.dataset.l; result(S.view==="result-listen"?"listen":"lang");
+});
+function result(which, timeUp){
+  stopTimer(); $("strip").hidden = true;
+  if(which==="lang"){
+    S.view="result-lang"; setHeader("結果　"+LANG.name, false);
+    const ok = LANG.items.filter((q,i)=>S.lang[i]===q.a).length;
+    $("app").innerHTML = `
+      <h1>答えあわせ</h1>
+      ${timeUp?`<p class="lead">時間に なりました。ぬった ところまでで 採点しました。</p>`:""}
+      <div class="card"><div class="score">${ok}<small> / ${LANG.items.length}問</small></div>
+        <p>本番では、言語知識（文字・語彙・文法）と読解を あわせて 120点中 38点が 基準点です。この 28問は 文字・語彙だけなので、点数は 目安です。</p></div>
+      ${LANG.items.map((q,i)=>{
+        const me=S.lang[i], good=me===q.a;
+        return `<div class="rv"><div class="top"><span class="qnum">${i+1}</span><span class="pill ${good?"ok":"ng"}">${good?"せいかい":"まちがい"}</span><span class="meta" style="font-size:12.5px;color:var(--muted)">${q.m}</span></div>
+          <div class="stemsm">${q.stem}</div>
+          ${rowHTML(i+1, me, "r"+i, {lock:true, correct:q.a})}
+          <div class="meta" style="font-size:13px">こたえ：${q.a} ${q.ch[q.a-1]}　／　あなた：${me?me+" "+q.ch[me-1]:"ぬっていない"}</div>
+          ${exHTML("l"+i, q.ja, q.id)}</div>`;}).join("")}
+      <div class="card save"><h3>結果を ほぞんする</h3>
+        <p>画像（PNG）で ほぞんして、先生に おくってください。</p>
+        <div><button class="btn" id="dl">画像を ダウンロード</button></div>
+        <img id="pv" alt="結果の画像">
+        <p class="meta">ダウンロードできないときは、上の画像を 長おしして ほぞんしてください。</p></div>
+      <div class="nav" style="margin-top:8px"><button class="btn ghost" id="back">もどる</button><button class="btn ghost" id="again">もう一度</button></div>`;
+    setupSave("lang");
+    $("back").onclick = home;
+    $("again").onclick = () => { S.lang = Array(LANG.items.length).fill(0); S.done.lang=false; S.idx=0; lang(0); };
+  } else {
+    S.view="result-listen"; setHeader("結果　聴解", false);
+    const me=S.listen, good=me===LISTEN.a;
+    $("app").innerHTML = `
+      <h1>答えあわせ</h1>
+      <div class="rv"><div class="top"><span class="qnum">1番</span><span class="pill ${good?"ok":"ng"}">${good?"せいかい":"まちがい"}</span></div>
+        <div class="choices one" style="font-family:var(--f-paper)">${LISTEN.ch.map((c,k)=>`<div><span class="n">${k+1}</span><span>${c}</span></div>`).join("")}</div>
+        ${rowHTML(1, me, "rl", {lock:true, correct:LISTEN.a})}
+        <div class="meta" style="font-size:13px">こたえ：${LISTEN.a}　／　あなた：${me||"ぬっていない"}</div>
+        ${exHTML("ls", LISTEN.ja, LISTEN.id)}</div>
+      <div class="rv"><div class="top"><b style="font-size:14px">スクリプト（練習用）</b></div>
+        <div class="script">${LISTEN.script.map(([s,t])=>`<div>${s?`<span class="sp">${s}</span>`:""}${t}</div>`).join("")}</div>
+        <div><button class="btn ghost small" id="replay">もう一度 聞く</button></div>
+        <div class="phase" id="phase2"></div></div>
+      <div class="card save"><h3>結果を ほぞんする</h3>
+        <p>画像（PNG）で ほぞんして、先生に おくってください。</p>
+        <div><button class="btn" id="dl">画像を ダウンロード</button></div>
+        <img id="pv" alt="結果の画像">
+        <p class="meta">ダウンロードできないときは、上の画像を 長おしして ほぞんしてください。</p></div>
+      <div class="nav" style="margin-top:8px"><button class="btn ghost" id="back">もどる</button><button class="btn ghost" id="again">もう一度 ためす</button></div>`;
+    setupSave("listen");
+    $("back").onclick = home;
+    $("again").onclick = () => { S.listen=0; S.done.listen=false; listen(); };
+    $("replay").onclick = () => { stopAudio(); playTimeline(()=>{}, (ph)=>{ $("phase2").innerHTML = `<b>${ph}</b>`; }); };
+  }
+  window.scrollTo(0,0);
+}
+
+/* ---------- listening ---------- */
+function listen(){
+  S.view="listen"; setHeader(LISTEN.name, false); stopTimer();
+  $("app").innerHTML = `
+    <section class="paper" aria-label="もんだいようし">
+      <div class="mondai"><b>${LISTEN.m}</b><p>${LISTEN.ins}</p></div>
+      <div class="stem" style="font-size:17px"><span class="qnum" style="min-width:2.6em">1番</span></div>
+      <div class="choices one">${LISTEN.ch.map((c,k)=>`<div><span class="n">${k+1}</span><span>${c}</span></div>`).join("")}</div>
+      <div class="player">
+        <div class="prog"><i id="bar"></i></div>
+        <div class="phase" id="phase"><span>音声は 1回だけ ながれます。</span><span></span></div>
+        <div><button class="btn" id="play">音声を はじめる</button></div>
+      </div>
+    </section>`;
+  $("strip").hidden = false;
+  $("stripIn").innerHTML = `<div class="sheetlabel"><span>かいとうようし　Answer Sheet</span><span>聴解</span></div>${rowHTML(1, S.listen, "listen")}
+    <div class="nav"><button class="btn ghost small" id="quit">やめる</button><span class="mid"></span><button class="btn small" id="lfin" disabled>答えあわせ</button></div>`;
+  $("quit").onclick = home;
+  $("lfin").onclick = () => { S.done.listen = true; result("listen"); };
+  $("play").onclick = () => {
+    $("play").disabled = true; $("play").textContent = "ながれています";
+    playTimeline(() => { $("lfin").disabled = false; $("phase").innerHTML = `<b>おわりです。</b><span>答えあわせを おしてください</span>`; $("bar").style.width="100%"; },
+      (ph, left, frac) => {
+        $("phase").innerHTML = `<b>${ph}</b><span>${left!=null?"あと "+left+" 秒":""}</span>`;
+        $("bar").style.width = Math.round(frac*100)+"%";
+      });
+  };
+}
+
+/* ---------- audio engine: decode, trim edge silence, schedule with exact gaps ---------- */
+let ctx = null, buffers = null, sources = [], uiTimer = 0;
+async function loadBuffers(){
+  if(buffers) return buffers;
+  ctx = ctx || new (window.AudioContext||window.webkitAudioContext)();
+  buffers = {};
+  const names = [...new Set(LISTEN.timeline.map(s=>s.f))];
+  for(const k of names){
+    const res = await fetch(`audio/${k}.mp3?v=${encodeURIComponent(VERSION)}`);
+    if(!res.ok) throw new Error("audio " + k);
+    const ab = await res.arrayBuffer();
+    const buf = await new Promise((ok,ng)=>ctx.decodeAudioData(ab, ok, ng));
+    buffers[k] = {buf, ...edges(buf, k.includes("chime"))};
+  }
+  return buffers;
+}
+function edges(buf, keepTail){
+  const d = buf.getChannelData(0), th = 0.012, sr = buf.sampleRate;
+  let s = 0, e = d.length-1;
+  while(s<d.length && Math.abs(d[s])<th) s++;
+  while(e>s && Math.abs(d[e])<th) e--;
+  const pad = 0.03*sr;
+  s = Math.max(0, s-pad); e = keepTail ? d.length-1 : Math.min(d.length-1, e+pad);
+  return {off:s/sr, dur:(e-s)/sr};
+}
+async function playTimeline(onEnd, onPhase){
+  ctx = ctx || new (window.AudioContext||window.webkitAudioContext)();
+  await ctx.resume();
+  await loadBuffers();
+  stopAudio();
+  let t = ctx.currentTime + 0.4;
+  const t0 = t, marks = [];
+  for(const step of LISTEN.timeline){
+    const b = buffers[step.f];
+    const src = ctx.createBufferSource(); src.buffer = b.buf; src.connect(ctx.destination);
+    src.start(t, b.off, b.dur); sources.push(src);
+    marks.push({t, ph:step.ph});
+    t += b.dur;
+    if(step.ans) marks.push({t, ph:"解答時間", ans:t+step.gap});
+    t += step.gap;
+  }
+  const tEnd = t;
+  const tick = () => {
+    const now = ctx.currentTime;
+    if(now >= tEnd){ clearInterval(uiTimer); onEnd(); return; }
+    let cur = marks[0];
+    for(const m of marks) if(now >= m.t) cur = m;
+    const left = cur.ans ? Math.ceil(cur.ans - now) : null;
+    onPhase(now < t0 ? "まもなく はじまります" : cur.ph, left, (now-t0)/(tEnd-t0));
+  };
+  clearInterval(uiTimer); uiTimer = setInterval(tick, 200); tick();
+}
+function stopAudio(){
+  clearInterval(uiTimer);
+  sources.forEach(s=>{ try{s.stop()}catch(e){} }); sources = [];
+}
+
+/* ---------- result image (PNG) ---------- */
+function stamp(){
+  const d = new Date(), z = n => String(n).padStart(2,"0");
+  return {txt:`${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`,
+          file:`${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}`};
+}
+const plain = h => h.replace(/<[^>]+>/g,"").replace(/\s+/g," ").trim();
+async function drawResult(which){
+  try{ await document.fonts.ready; }catch(e){}
+  const rows = which==="lang"
+    ? LANG.items.map((q,i)=>({no:String(i+1), kind:q.m.replace("　"," "), me:S.lang[i], a:q.a}))
+    : [{no:"1番", kind:"聴解 もんだい1（課題理解）", me:S.listen, a:LISTEN.a}];
+  const ok = rows.filter(r=>r.me===r.a).length;
+  const W=1080, rowH=76, top=430, H=top+rows.length*rowH+150;
+  const c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
+  const M='"BIZ UDMincho","Hiragino Mincho ProN",serif', G='"BIZ UDPGothic","Hiragino Sans",sans-serif';
+  g.fillStyle="#ffffff"; g.fillRect(0,0,W,H);
+  g.strokeStyle="#1c2125"; g.lineWidth=4; g.strokeRect(24,24,W-48,H-48);
+  g.fillStyle="#1c2125"; g.textBaseline="alphabetic";
+  g.font=`700 44px ${M}`; g.fillText(`JLPT ${TEST.level} 模擬試験　結果`, 64, 110);
+  g.font=`400 30px ${G}`; g.fillStyle="#5b646c";
+  g.fillText(which==="lang"?LANG.name:"聴解", 64, 160);
+  g.fillStyle="#1c2125"; g.font=`700 36px ${G}`;
+  g.fillText(`${S.name}　（${S.cohort}期）`, 64, 236);
+  g.font=`400 28px ${G}`; g.fillStyle="#5b646c"; g.fillText(stamp().txt, 64, 284);
+  g.fillStyle="#1c2125"; g.font=`700 96px ${G}`; const sc=String(ok); g.fillText(sc, W-330, 250);
+  const sw=g.measureText(sc).width; g.font=`400 36px ${G}`; g.fillStyle="#5b646c"; g.fillText(` / ${rows.length}問`, W-330+sw, 250);
+  g.fillStyle="#1c2125"; g.font=`700 26px ${G}`;
+  const cols=[64,170,690,830,960];
+  ["番号","問題","あなた","こたえ","結果"].forEach((t,i)=>g.fillText(t, cols[i], top-24));
+  g.fillRect(56, top-8, W-112, 3);
+  rows.forEach((r,i)=>{
+    const y=top+i*rowH+50, good=r.me===r.a;
+    if(i%2===1){ g.fillStyle="#f2f4f2"; g.fillRect(56, y-50+3, W-112, rowH); }
+    g.fillStyle="#1c2125"; g.font=`700 30px ${G}`; g.fillText(r.no, cols[0], y);
+    g.font=`400 28px ${G}`; g.fillText(r.kind, cols[1], y);
+    g.font=`700 30px ${G}`; g.fillText(r.me?String(r.me):"－", cols[2]+20, y); g.fillText(String(r.a), cols[3]+20, y);
+    g.fillStyle=good?"#2e7a4e":"#b3261e"; g.font=`700 34px ${G}`; g.fillText(good?"○":"×", cols[4]+14, y);
+  });
+  g.fillStyle="#5b646c"; g.font=`400 24px ${G}`;
+  g.fillText(`IJFA トレーニングセンター　JLPT ${TEST.level} ${TEST.title}`, 64, H-64);
+  return c;
+}
+async function setupSave(which){
+  const c = await drawResult(which);
+  const url = c.toDataURL("image/png");
+  const pv = $("pv"); if(pv) pv.src = url;
+  const b = $("dl"); if(!b) return;
+  b.onclick = () => {
+    const safe = (S.name||"name").replace(/[\\/:*?"<>|\s]+/g,"_");
+    const a = document.createElement("a");
+    a.href = url; a.download = `JLPT-${TEST.level}_${which==="lang"?"gengo":"choukai"}_${safe}_${stamp().file}.png`;
+    document.body.appendChild(a); a.click(); a.remove();
+  };
+}
+
+let VERSION = "";
+async function boot(){
+  try{
+    CATALOG = await (await fetch("catalog.json?t=" + Date.now())).json();
+    const all = CATALOG.levels.flatMap(l => l.tests.map(t => ({...t, level:l.level})));
+    const want = new URLSearchParams(location.search).get("t");
+    TEST = all.find(t => t.id === want) || all.find(t => t.level === "N4") || all[0];
+    const res = await fetch(TEST.id + ".json?t=" + Date.now());
+    const data = await res.json();
+    LANG = data.vocab; LISTEN = data.listen; VERSION = data.version || "";
+  }catch(e){
+    $("app").innerHTML = '<p class="lead" style="margin-top:24px">問題を 読みこめませんでした。インターネットの 接続を たしかめて、ページを 読みこみなおして ください。</p>';
+    return;
+  }
+  initState();
+  try{ const w = JSON.parse(localStorage.getItem("n4who")||"null"); if(w){ S.name=w.n||""; S.cohort=w.c||""; } }catch(e){}
+  home();
+}
+boot();
+</script>
+</body>
+</html>
