@@ -91,6 +91,10 @@ h1{font-family:var(--f-paper);font-size:24px;margin:24px 0 4px;text-wrap:balance
 .card h3{margin:0;font-size:16px}
 .card p{margin:0;color:var(--muted);font-size:13.5px}
 .card .meta{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.card h3 .idn{display:block;font-size:12.5px;font-weight:400;color:var(--muted)}
+.brk{display:flex;align-items:center;gap:10px;margin:-2px 0 10px;color:var(--muted);font-size:13px}
+.brk::before,.brk::after{content:"";flex:1;border-top:1px dashed var(--rule)}
+.sched{font-variant-numeric:tabular-nums}
 .score{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
 .score small{font-size:16px;color:var(--muted);font-weight:400}
 .rv{border:1px solid var(--rule);border-radius:8px;background:var(--sheet-bg);padding:14px;display:grid;gap:8px;margin-bottom:10px}
@@ -163,7 +167,7 @@ h1{font-family:var(--f-paper);font-size:24px;margin:24px 0 4px;text-wrap:balance
 <div class="overlay" id="overlay" hidden></div>
 
 <script>
-let SECS, LISTEN, S, SEC;
+let SECS, LISTEN, S, SEC, BREAKS = [];
 let CATALOG = null, TEST = null, VERSION = "";
 function initState(){
   S = {name:"", view:"home", idx:0, ans:{}, done:{}, listen:0, timerEnd:0, timerId:0, ex:{}, playing:false};
@@ -225,10 +229,13 @@ function levelCard(){
 function home(){
   stopTimer(); stopAudio(); S.view="home"; setHeader(`JLPT ${TEST.level} 模擬試験`, false);
   $("strip").hidden = true;
-  const secCards = SECS.map(sec => {
+  // 本番の 休憩（テストの あいだ）。データに breaks が あれば 表示する
+  const BRK = BREAKS;
+  const brkHTML = m => m ? `<div class="brk">休憩 ${m}分 ／ Istirahat ${m} menit</div>` : "";
+  const secCards = SECS.map((sec, k) => {
     const answered = S.ans[sec.id].filter(Boolean).length;
-    return `<div class="card">
-      <h3>${sec.name}</h3>
+    return (k ? brkHTML(BRK[k-1]) : "") + `<div class="card">
+      <h3>${sec.name}${sec.nameId ? `<span class="idn">${sec.nameId}</span>` : ""}</h3>
       <p>${sec.desc || ""}</p>
       <div class="meta">${sec.items.length}問 ・ ${sec.minutes}分（本番と 同じ）</div>
       <div><button class="btn" data-sec="${sec.id}">${S.done[sec.id]?"結果を見る":(answered?"つづける":"はじめる")}</button></div>
@@ -241,9 +248,11 @@ function home(){
       <h3>なまえ</h3>
       <label class="one-field" for="nm">なまえ（ローマ字でも いいです。入れなくても できます）<input id="nm" autocomplete="name" value="${S.name.replace(/"/g,"&quot;")}"></label>
     </div>
+    ${schedCard()}
     ${secCards}
+    ${brkHTML(BRK[SECS.length-1])}
     <div class="card">
-      <h3>${LISTEN.name}</h3>
+      <h3>${LISTEN.name}${LISTEN.nameId ? `<span class="idn">${LISTEN.nameId}</span>` : ""}</h3>
       <p>${LISTEN.desc || ""}</p>
       <div class="meta">${LI().length}問 ・ やく 30分</div>
       <div><button class="btn" id="goListen">${S.done.listen?"結果を見る":"はじめる"}</button></div>
@@ -255,6 +264,19 @@ function home(){
     S.done[SEC.id] ? result(SEC.id) : (S.idx=0, question(S.ans[SEC.id].findIndex(v=>!v) > 0 ? S.ans[SEC.id].findIndex(v=>!v) : 0));
   });
   $("goListen").onclick = () => { saveName(); S.done.listen ? result("listen") : listen(); };
+}
+
+/* 本番の 時間わり（テストと 休憩の 合計） */
+function schedCard(){
+  const BRK = BREAKS; if(!BRK.length) return "";
+  const mins = SECS.map(s=>s.minutes).concat([LISTEN.minutes]);
+  const total = mins.reduce((a,b)=>a+b,0) + BRK.reduce((a,b)=>a+b,0);
+  const h = Math.floor(total/60), m = total%60;
+  return `<div class="card sched">
+    <h3>本番の 時間<span class="idn">Waktu ujian yang sebenarnya</span></h3>
+    <p>テスト ${mins.join("分 → ")}分 の あいだに、休憩が ${BRK.length}回 あります。ぜんぶで やく ${h}時間${m?m+"分":""}です（せつめいの 時間は のぞく）。</p>
+    <p>Ada ${BRK.length} kali istirahat di antara tes. Totalnya sekitar ${h} jam${m?" "+m+" menit":""} (tidak termasuk waktu penjelasan).</p>
+  </div>`;
 }
 
 /* ---------- paper (one question) ---------- */
@@ -581,7 +603,7 @@ async function boot(){
     const want = new URLSearchParams(location.search).get("t");
     TEST = all.find(t => t.id === want) || all.find(t => t.level === "N4") || all[0];
     const data = await (await fetch(TEST.id + ".json?t=" + Date.now())).json();
-    SECS = data.sections; LISTEN = data.listen; VERSION = data.version || "";
+    SECS = data.sections; LISTEN = data.listen; VERSION = data.version || ""; BREAKS = data.breaks || [];
   }catch(e){
     $("app").innerHTML = '<p class="lead" style="margin-top:24px">問題を 読みこめませんでした。インターネットの 接続を たしかめて、ページを 読みこみなおして ください。</p>';
     return;
