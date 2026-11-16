@@ -42,6 +42,8 @@ header.bar .in{max-width:560px;margin:0 auto;display:flex;align-items:center;gap
 button{font:inherit;cursor:pointer}
 .btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:10px 16px;font-weight:700}
 .btn.ghost{background:transparent;color:var(--accent)}
+.btn.danger{background:transparent;border-color:var(--ng);color:var(--ng)}
+.btn.danger.fill{background:var(--ng);color:#fff}
 .btn:disabled{opacity:.4;cursor:default}
 .btn:focus-visible,.bub:focus-visible,.row:focus-visible{outline:3px solid var(--sheet);outline-offset:2px}
 .small{padding:6px 10px;font-size:13px}
@@ -92,6 +94,13 @@ h1{font-family:var(--f-paper);font-size:24px;margin:24px 0 4px;text-wrap:balance
 .card p{margin:0;color:var(--muted);font-size:13.5px}
 .card .meta{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 .card h3 .idn{display:block;font-size:12.5px;font-weight:400;color:var(--muted)}
+/* インドネシア語（小さく） */
+.idt{display:block;font-size:12px;line-height:1.5;color:var(--muted);font-weight:400;font-family:var(--f-ui);letter-spacing:0}
+.tag .idt,.pill .idt{display:inline;font-size:10.5px;color:inherit;opacity:.85;margin-left:4px}
+button .idt{color:inherit;opacity:.85;font-size:11px}
+.secscore .idt{display:inline;margin-left:4px}
+.tot th .idt{font-size:10.5px}
+.bars .idt{font-size:10.5px}
 .brk{display:flex;align-items:center;gap:10px;margin:-2px 0 10px;color:var(--muted);font-size:13px}
 .brk::before,.brk::after{content:"";flex:1;border-top:1px dashed var(--rule)}
 .sched{font-variant-numeric:tabular-nums}
@@ -109,6 +118,39 @@ h1{font-family:var(--f-paper);font-size:24px;margin:24px 0 4px;text-wrap:balance
 .tabs button{border:1px solid var(--rule);background:transparent;color:var(--muted);border-radius:99px;padding:3px 10px;font-size:12px}
 .tabs button[aria-pressed="true"]{background:var(--ink);color:var(--sheet-bg);border-color:var(--ink)}
 
+/* section score, total, verdict */
+.secscore{display:flex;align-items:baseline;gap:6px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}
+.secscore b{font-size:28px;color:var(--ink);line-height:1.1}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;margin-left:6px;vertical-align:2px}
+.tag.done{background:var(--ok-soft);color:var(--ok)}
+.tag.now{background:var(--sheet-soft);color:var(--ink)}
+.card.flash{border:1.5px solid var(--accent)}
+.card.flash p{color:var(--ink)}
+.card.total{border:1.5px solid var(--ink)}
+.tot{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+.tot th,.tot td{border-bottom:1px solid var(--rule);padding:8px 4px;text-align:left;vertical-align:top}
+.tot th{font-size:12px;color:var(--muted);font-weight:400}
+.tot td.r,.tot th.r{text-align:right;white-space:nowrap}
+.tot td b{font-size:18px}
+.tot tr.sum td{border-bottom:0;font-weight:700}
+.tot small{display:block;font-size:11.5px;color:var(--muted);font-weight:400}
+.ok-t{color:var(--ok);font-weight:700}
+.ng-t{color:var(--ng);font-weight:700}
+.verdict{font-size:30px;font-weight:700;text-align:center;padding:12px;border-radius:8px;line-height:1.3}
+.verdict small{display:block;font-size:13px;font-weight:400}
+.verdict.pass{background:var(--ok-soft);color:var(--ok)}
+.verdict.fail{background:var(--ng-soft);color:var(--ng)}
+.card .why{color:var(--ng);font-weight:700;font-size:14px}
+.card .why .idt{color:var(--ng);opacity:.85}
+.card.total summary .idt{display:inline;margin-left:4px}
+.btnrow{display:grid;gap:8px}
+.bars{display:grid;gap:6px;font-size:13px;font-variant-numeric:tabular-nums;margin-top:8px}
+.bars>div{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 3em;gap:8px;align-items:center}
+.bars i{height:8px;background:var(--rule);border-radius:99px;overflow:hidden;display:block}
+.bars i b{display:block;height:100%;background:var(--sheet)}
+.bars>div>span:last-child{text-align:right}
+details.more summary{cursor:pointer;font-size:13px;color:var(--muted)}
+
 /* listening */
 .player{margin-top:14px;display:grid;gap:10px}
 .prog{height:6px;background:var(--rule);border-radius:99px;overflow:hidden}
@@ -118,7 +160,7 @@ h1{font-family:var(--f-paper);font-size:24px;margin:24px 0 4px;text-wrap:balance
 .script{font-family:var(--f-paper);font-size:15px;line-height:1.9;display:grid;gap:4px}
 .script .sp{font-family:var(--f-ui);font-size:12px;color:var(--muted);margin-right:6px}
 .confirm{border:1.5px solid var(--sheet);background:var(--sheet-soft);border-radius:8px;padding:12px;display:grid;gap:10px;margin-top:14px}
-.confirm p{margin:0;font-size:14px}
+.confirm p{margin:0;font-size:14px;color:var(--ink)}
 .confirm .nav{justify-content:flex-end}
 .who{display:grid;grid-template-columns:1fr 6.5em;gap:10px}
 .who label{display:grid;gap:4px;font-size:12.5px;color:var(--muted);min-width:0}
@@ -167,22 +209,79 @@ h1{font-family:var(--f-paper);font-size:24px;margin:24px 0 4px;text-wrap:balance
 <div class="overlay" id="overlay" hidden></div>
 
 <script>
-let SECS, LISTEN, S, SEC, BREAKS = [];
+let SECS, LISTEN, S, SEC, BREAKS = [], SCORE;
 let CATALOG = null, TEST = null, VERSION = "";
+/* 得点区分（N4・N5）。N3 など 区分が ちがう ときは データの scoring で かえる */
+const SCORE_DEFAULT = {lk:{name:"言語知識（文字・語彙・文法）・読解", max:120, min:38}, ls:{name:"聴解", max:60, min:19}, pass:90, total:180};
 function initState(){
-  S = {name:"", view:"home", idx:0, ans:{}, done:{}, listen:0, timerEnd:0, timerId:0, ex:{}, playing:false};
+  S = {name:"", view:"home", idx:0, ans:{}, done:{}, tend:{}, listen:0, timerEnd:0, timerId:0, ex:{}, playing:false, flash:""};
   SECS.forEach(sec => { S.ans[sec.id] = Array(sec.items.length).fill(0); S.done[sec.id] = false; });
   S.done.listen = false;
   S.lans = Array(LI().length).fill(0); S.lcur = 0;
 }
 const $ = id => document.getElementById(id);
 const who = () => S.name || "No name";
+const ID = t => `<span class="idt">${t}</span>`;
+const SHORT_ID = {vocab:"Kosakata", grammar:"Tata Bahasa & Membaca", listen:"Mendengarkan"};
+const secShort = id => SHORT_ID[id] || secId(id);
+const secId = id => id==="listen" ? (LISTEN.nameId || LISTEN.name) : (SECS.find(s=>s.id===id).nameId || SECS.find(s=>s.id===id).name);
+/* 大問の 名前を インドネシア語に */
+function mondaiId(k){
+  const map = [["文字・語彙","Kosakata"],["文法","Tata bahasa"],["読解","Membaca"],["聴解","Mendengarkan"]];
+  const f = map.find(([j])=>k.startsWith(j)); const n = (k.match(/もんだい\s*(\d+)/)||[])[1];
+  return f ? `${f[1]}${n?" – Mondai "+n:""}` : "";
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function setHeader(name, showSheet){ $("secName").textContent = name; $("openSheet").hidden = !showSheet; }
 
+/* ---------- record (このスマホの ブラウザに のこす。リセットで けす) ---------- */
+const recKey = () => "jlptRec:" + TEST.id;
+function saveRec(){
+  try{ localStorage.setItem(recKey(), JSON.stringify({ans:S.ans, lans:S.lans, done:S.done, tend:S.tend, at:Date.now()})); }catch(e){}
+}
+function loadRec(){
+  try{
+    const r = JSON.parse(localStorage.getItem(recKey()) || "null"); if(!r) return;
+    SECS.forEach(sec => {
+      const a = r.ans && r.ans[sec.id];
+      if(Array.isArray(a) && a.length===sec.items.length){ S.ans[sec.id] = a; S.done[sec.id] = !!(r.done && r.done[sec.id]); }
+    });
+    if(Array.isArray(r.lans) && r.lans.length===S.lans.length){ S.lans = r.lans; S.done.listen = !!(r.done && r.done.listen); }
+    S.tend = r.tend || {};
+  }catch(e){}
+}
+function clearRec(){ try{ localStorage.removeItem(recKey()); }catch(e){} }
+
+/* ---------- scores ---------- */
+function secOk(id){
+  if(id==="listen"){ const L = LI(); return {ok:L.filter(x=>S.lans[x.g]===x.it.a).length, n:L.length}; }
+  const sec = SECS.find(s=>s.id===id);
+  return {ok:sec.items.filter((q,i)=>S.ans[id][i]===q.a).length, n:sec.items.length};
+}
+const allDone = () => SECS.every(s=>S.done[s.id]) && S.done.listen;
+function totals(){
+  const lkOk = SECS.reduce((a,s)=>a+secOk(s.id).ok,0), lkN = SECS.reduce((a,s)=>a+s.items.length,0);
+  const l = secOk("listen");
+  const lk = Math.round(lkOk/lkN*SCORE.lk.max), ls = Math.round(l.ok/l.n*SCORE.ls.max);
+  const total = lk + ls, lkPass = lk>=SCORE.lk.min, lsPass = ls>=SCORE.ls.min, totalPass = total>=SCORE.pass;
+  return {lkOk, lkN, lsOk:l.ok, lsN:l.n, lk, ls, total, lkPass, lsPass, totalPass, pass: lkPass && lsPass && totalPass};
+}
+function byMondai(){
+  const out = [];
+  SECS.forEach(sec => {
+    const m = new Map();
+    sec.items.forEach((q,i) => { const k = q.m.replace("　"," "); const o = m.get(k) || {k, kid:mondaiId(k), ok:0, n:0}; o.n++; if(S.ans[sec.id][i]===q.a) o.ok++; m.set(k,o); });
+    out.push(...m.values());
+  });
+  const L = LI();
+  LISTEN.mondai.forEach(md => { const o = {k:`聴解 もんだい${md.no}`, kid:`Mendengarkan – Mondai ${md.no}`, ok:0, n:0}; L.filter(x=>x.md===md).forEach(x=>{ o.n++; if(S.lans[x.g]===x.it.a) o.ok++; }); out.push(o); });
+  return out;
+}
+
 /* ---------- timer ---------- */
-function startTimer(min, onEnd){
+function startTimer(endAt, onEnd){
   stopTimer();
-  S.timerEnd = Date.now() + min*60000;
+  S.timerEnd = endAt;
   const t = $("timer"); t.hidden = false;
   const tick = () => {
     const left = Math.max(0, S.timerEnd - Date.now());
@@ -191,7 +290,7 @@ function startTimer(min, onEnd){
     t.classList.toggle("low", left < 60000);
     if(left <= 0){ stopTimer(); onEnd(); }
   };
-  tick(); S.timerId = setInterval(tick, 500);
+  S.timerId = setInterval(tick, 500); tick();
 }
 function stopTimer(){ clearInterval(S.timerId); S.timerId = 0; $("timer").hidden = true; }
 
@@ -206,7 +305,7 @@ function rowHTML(no, val, key, opts={}){
   return `<div class="row" role="radiogroup" aria-label="問題 ${no}"><span class="no">${no}</span><div class="bubs">${b}</div></div>`;
 }
 function getAns(k){ if(k.startsWith("listen:")) return S.lans[+k.split(":")[1]]; const [sid,i]=k.split(":"); return S.ans[sid] ? S.ans[sid][+i] : 0; }
-function setAns(k,v){ if(k.startsWith("listen:")){ S.lans[+k.split(":")[1]]=v; return; } const [sid,i]=k.split(":"); if(S.ans[sid]) S.ans[sid][+i]=v; }
+function setAns(k,v){ if(k.startsWith("listen:")){ S.lans[+k.split(":")[1]]=v; saveRec(); return; } const [sid,i]=k.split(":"); if(S.ans[sid]){ S.ans[sid][+i]=v; saveRec(); } }
 document.addEventListener("click", e => {
   const b = e.target.closest(".bub"); if(!b || b.disabled) return;
   const k = b.dataset.k, v = +b.dataset.v;
@@ -226,6 +325,14 @@ function levelCard(){
       return `<a class="lvb${on?" on":""}" href="?t=${t.id}">${l.level}<small>${t.title}</small></a>`;
     }).join("")}</div></div>`;
 }
+function scoreLine(id){
+  const r = secOk(id);
+  return scoreHTML(r);
+}
+function scoreHTML(r){
+  const pct = Math.round(r.ok/r.n*100);
+  return `<div class="secscore"><b>${r.ok}</b> / ${r.n}問 せいかい（${pct}%）</div>${ID(`Benar ${r.ok} dari ${r.n} soal (${pct}%)`)}`;
+}
 function home(){
   stopTimer(); stopAudio(); S.view="home"; setHeader(`JLPT ${TEST.level} 模擬試験`, false);
   $("strip").hidden = true;
@@ -233,37 +340,118 @@ function home(){
   const BRK = BREAKS;
   const brkHTML = m => m ? `<div class="brk">休憩 ${m}分 ／ Istirahat ${m} menit</div>` : "";
   const secCards = SECS.map((sec, k) => {
-    const answered = S.ans[sec.id].filter(Boolean).length;
-    return (k ? brkHTML(BRK[k-1]) : "") + `<div class="card">
-      <h3>${sec.name}${sec.nameId ? `<span class="idn">${sec.nameId}</span>` : ""}</h3>
-      <p>${sec.desc || ""}</p>
+    const answered = S.ans[sec.id].filter(Boolean).length, done = S.done[sec.id];
+    return (k ? brkHTML(BRK[k-1]) : "") + `<div class="card" id="card-${sec.id}">
+      <h3>${sec.name}${done?`<span class="tag done">おわり${ID("Selesai")}</span>`:(answered?`<span class="tag now">とちゅう${ID("Belum selesai")}</span>`:"")}${sec.nameId ? `<span class="idn">${sec.nameId}</span>` : ""}</h3>
+      ${done ? scoreLine(sec.id) : `<p>${sec.desc || ""}</p>`}
       <div class="meta">${sec.items.length}問 ・ ${sec.minutes}分（本番と 同じ）</div>
-      <div><button class="btn" data-sec="${sec.id}">${S.done[sec.id]?"結果を見る":(answered?"つづける":"はじめる")}</button></div>
+      <div><button class="btn${done?" ghost":""}" data-sec="${sec.id}">${done?`答えあわせを 見る${ID("Lihat pembahasan")}`:(answered?"つづける":"はじめる")}</button></div>
     </div>`;}).join("");
+  const started = SECS.some(s=>S.done[s.id] || S.ans[s.id].some(Boolean)) || S.done.listen || S.lans.some(Boolean);
   $("app").innerHTML = `
     <h1>JLPT ${TEST.level} ${TEST.title}</h1>
-    <p class="lead">本番と同じように、マークシートの ①②③④ をタップして ぬります。もう一度タップすると けせます。</p>
+    ${S.flash ? `<div class="card flash" role="status">${S.flash}</div>` : ""}
+    ${allDone() ? totalCard() : `<p class="lead">本番と同じように、マークシートの ①②③④ をタップして ぬります。もう一度タップすると けせます。3つの テストが ぜんぶ おわると、合計点と 合否判定が 出ます。${ID("Nilai total muncul setelah 3 tes selesai.")}</p>`}
     ${levelCard()}
     <div class="card">
       <h3>なまえ</h3>
-      <label class="one-field" for="nm">なまえ（ローマ字でも いいです。入れなくても できます）<input id="nm" autocomplete="name" value="${S.name.replace(/"/g,"&quot;")}"></label>
+      <label class="one-field" for="nm">なまえ（ローマ字でも いいです。入れなくても できます）<input id="nm" autocomplete="name" value="${esc(S.name)}"></label>
     </div>
     ${schedCard()}
     ${secCards}
     ${brkHTML(BRK[SECS.length-1])}
-    <div class="card">
-      <h3>${LISTEN.name}${LISTEN.nameId ? `<span class="idn">${LISTEN.nameId}</span>` : ""}</h3>
-      <p>${LISTEN.desc || ""}</p>
-      <div class="meta">${LI().length}問 ・ やく 30分</div>
-      <div><button class="btn" id="goListen">${S.done.listen?"結果を見る":"はじめる"}</button></div>
+    <div class="card" id="card-listen">
+      <h3>${LISTEN.name}${S.done.listen?`<span class="tag done">おわり${ID("Selesai")}</span>`:""}${LISTEN.nameId ? `<span class="idn">${LISTEN.nameId}</span>` : ""}</h3>
+      ${S.done.listen ? scoreLine("listen") : `<p>${LISTEN.desc || ""}</p>`}
+      <div class="meta">${LI().length}問 ・ やく 30分（本番は ${LISTEN.minutes}分）</div>
+      <div><button class="btn${S.done.listen?" ghost":""}" id="goListen">${S.done.listen?`答えあわせを 見る${ID("Lihat pembahasan")}`:"はじめる"}</button></div>
     </div>
-    <p class="foot">試験運用版です。問題は IJFA トレーニングセンターの オリジナルです。聴解の 音声は 音声合成で 作っています。</p>`;
+    ${started ? `<div class="card" id="resetCard">
+      <h3>リセット<span class="idn">Hapus catatan dan mulai dari awal</span></h3>
+      <p>この スマホに のこって いる こたえと 点数を ぜんぶ けして、さいしょから やりなおします。${ID("Semua jawaban dan nilai yang tersimpan di HP ini akan dihapus, lalu mulai lagi dari awal.")}</p>
+      <div><button class="btn danger" id="reset">リセットする${ID("Reset")}</button></div>
+    </div>` : ""}
+    <p class="foot">試験運用版です。問題は IJFA トレーニングセンターの オリジナルです。聴解の 音声は 音声合成で 作っています。こたえは この スマホの ブラウザに のこります（ページを とじても きえません）。</p>`;
+  S.flash = "";
   const saveName = () => { S.name = $("nm").value.trim(); try{ localStorage.setItem("jlptName", S.name); }catch(e){} };
+  $("nm").onchange = saveName;
   $("app").querySelectorAll("[data-sec]").forEach(b => b.onclick = () => {
     saveName(); SEC = SECS.find(s=>s.id===b.dataset.sec);
-    S.done[SEC.id] ? result(SEC.id) : (S.idx=0, question(S.ans[SEC.id].findIndex(v=>!v) > 0 ? S.ans[SEC.id].findIndex(v=>!v) : 0));
+    if(S.done[SEC.id]) return result(SEC.id);
+    const first = S.ans[SEC.id].findIndex(v=>!v);
+    question(first > 0 ? first : 0);
   });
   $("goListen").onclick = () => { saveName(); S.done.listen ? result("listen") : listen(); };
+  if($("reset")) $("reset").onclick = askReset;
+  if(allDone()) setupTotal();
+  window.scrollTo(0,0);
+}
+function askReset(){
+  const card = $("resetCard"), old = card.querySelector(".confirm"); if(old){ old.remove(); }
+  const box = document.createElement("div"); box.className = "confirm";
+  box.innerHTML = `<p>ほんとうに けしますか。けした 記録は もどせません。${allDone()?"結果の 画像は、先に ダウンロードして ください。":""}${ID(`Yakin ingin menghapus? Catatan tidak bisa dikembalikan.${allDone()?" Unduh dulu gambar hasilnya.":""}`)}</p>
+    <div class="nav"><button class="btn ghost small" id="rNo">やめる${ID("Batal")}</button><button class="btn danger fill small" id="rYes">けして やりなおす${ID("Hapus")}</button></div>`;
+  card.appendChild(box);
+  $("rNo").onclick = () => box.remove();
+  $("rYes").onclick = () => {
+    const name = S.name; clearRec(); initState(); S.name = name;
+    S.flash = `<p>記録を けしました。さいしょから はじめられます。${ID("Catatan sudah dihapus. Kamu bisa mulai dari awal.")}</p>`;
+    home();
+  };
+  box.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+/* 合計点と 合否判定（3つ ぜんぶ おわったら） */
+function totalCard(){
+  const T = totals();
+  const mark = p => p ? `<span class="ok-t">○</span>` : `<span class="ng-t">×</span>`;
+  const why = [];
+  if(!T.lkPass) why.push(["言語知識・読解が 基準点に とどいていません", "Bahasa & Membaca belum mencapai nilai minimum"]);
+  if(!T.lsPass) why.push(["聴解が 基準点に とどいていません", "Mendengarkan belum mencapai nilai minimum"]);
+  if(!T.totalPass) why.push(["総合が 合格点に とどいていません", "Nilai total belum mencapai batas lulus"]);
+  const bars = byMondai().map(o=>`<div><span>${o.k}${o.kid?ID(o.kid):""}</span><i><b style="width:${Math.round(o.ok/o.n*100)}%"></b></i><span>${o.ok}/${o.n}</span></div>`).join("");
+  return `<div class="card total" id="totalCard">
+    <h3>合計点と 合否判定<span class="idn">Nilai total dan hasil</span></h3>
+    <div class="verdict ${T.pass?"pass":"fail"}">${T.pass?"合格":"不合格"}<small>（推定）${T.pass?"LULUS":"TIDAK LULUS"}</small></div>
+    ${why.map(([j,i])=>`<p class="why">${j}${ID(i)}</p>`).join("")}
+    <table class="tot">
+      <thead><tr><th>区分</th><th class="r">点数${ID("Nilai")}</th><th class="r">基準点${ID("Minimum")}</th></tr></thead>
+      <tbody>
+        <tr><td>言語知識・読解${ID("Bahasa & Membaca")}</td><td class="r"><b>${T.lk}</b> / ${SCORE.lk.max}<small>${T.lkOk}/${T.lkN}問</small></td><td class="r">${SCORE.lk.min} ${mark(T.lkPass)}</td></tr>
+        <tr><td>聴解${ID("Mendengarkan")}</td><td class="r"><b>${T.ls}</b> / ${SCORE.ls.max}<small>${T.lsOk}/${T.lsN}問</small></td><td class="r">${SCORE.ls.min} ${mark(T.lsPass)}</td></tr>
+        <tr class="sum"><td>総合${ID("Total")}</td><td class="r"><b>${T.total}</b> / ${SCORE.total}</td><td class="r">${SCORE.pass} ${mark(T.totalPass)}</td></tr>
+      </tbody>
+    </table>
+    <details class="more"><summary>※ 推定の 点数です（くわしく）${ID("Nilai perkiraan (detail)")}</summary>
+      <p class="meta">本番は 得点調整が あるので、せいかいの 数から 出した 目安です。合格は、総合 ${SCORE.pass}点 以上、かつ 2つの 区分が 基準点 以上。${ID(`Ujian sebenarnya memakai penyesuaian nilai. Lulus jika total ${SCORE.pass}+ dan kedua bagian mencapai minimum.`)}</p></details>
+    <details class="more"><summary>大問ごとの せいかい${ID("Benar per mondai")}</summary><div class="bars">${bars}</div></details>
+    <div class="btnrow"><button class="btn" id="dlTotal">⬇ 結果の 画像を 保存する${ID("Simpan gambar hasil")}</button><button class="btn ghost" id="dlReview">⬇ まちがえた 問題を ダウンロードする${ID("Unduh soal yang salah (untuk latihan ulang)")}</button></div>
+    <details class="more"><summary>画像を 見る（保存できないときは 長おし）${ID("Lihat gambar (tekan lama untuk simpan)")}</summary>
+      <img id="totalPv" alt="結果の画像" style="width:100%;border:1px solid var(--rule);border-radius:6px;margin-top:6px"></details>
+  </div>`;
+}
+async function setupTotal(){
+  $("dlReview").onclick = () => {
+    const safe = fileName();
+    downloadBlob(reviewHTML(), "text/html;charset=utf-8", `JLPT-${TEST.level}_review_${safe}_${stamp().file}.html`);
+  };
+  const c = await drawTotal(); if(!$("totalPv")) return;
+  const url = c.toDataURL("image/png");
+  $("totalPv").src = url;
+  $("dlTotal").onclick = () => {
+    const safe = fileName();
+    const a = document.createElement("a");
+    a.href = url; a.download = `JLPT-${TEST.level}_result_${safe}_${stamp().file}.png`;
+    document.body.appendChild(a); a.click(); a.remove();
+  };
+}
+/* ファイル名は 英数字だけに する（日本語の 名前だと 保存できない ブラウザが ある） */
+function fileName(){ return (S.name||"").normalize("NFKD").replace(/[^A-Za-z0-9._-]+/g,"_").replace(/^_+|_+$/g,"") || "NoName"; }
+function downloadBlob(text, type, filename){
+  const url = URL.createObjectURL(new Blob([text], {type}));
+  const a = document.createElement("a"); a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
 /* 本番の 時間わり（テストと 休憩の 合計） */
@@ -280,17 +468,22 @@ function schedCard(){
 }
 
 /* ---------- paper (one question) ---------- */
-function passageHTML(pid, cur){
-  const p = SEC.passages && SEC.passages[pid]; if(!p) return "";
-  const html = p.replace(/\{(Q\d+)\}/g, (m, k) => { const n = +k.slice(1); return `<span class="mk${n===cur?" cur":""}">［${n}］</span>`; })
-                ;
+function passageHTML(pid, cur, sec){
+  sec = sec || SEC;
+  const p = sec.passages && sec.passages[pid]; if(!p) return "";
+  const html = p.replace(/\{(Q\d+)\}/g, (m, k) => { const n = +k.slice(1); return `<span class="mk${n===cur?" cur":""}">［${n}］</span>`; });
   const body = /<table|<p/.test(html) ? html : html.replace(/\n/g, "<br>");
   return `<div class="passage">${body}</div>`;
 }
 function question(i){
   S.view="q"; S.idx=i;
   setHeader(SEC.name, true);
-  if(!S.timerId) startTimer(SEC.minutes, () => submitSec(true));
+  if(!S.timerId){
+    // 時間は スマホに のこす（とちゅうで ページを とじても 時間は すすむ）
+    if(!S.tend[SEC.id]){ S.tend[SEC.id] = Date.now() + SEC.minutes*60000; saveRec(); }
+    startTimer(S.tend[SEC.id], () => submitSec(true));
+    if(S.view!=="q") return; // 時間が もう おわって いた
+  }
   const q = SEC.items[i], no = i+1;
   const prev = i>0 ? SEC.items[i-1] : null;
   const showIns = !prev || prev.m !== q.m || q.passage;
@@ -321,15 +514,32 @@ function askFinish(){
   const empty = S.ans[SEC.id].map((v,i)=>v?0:i+1).filter(Boolean);
   const box = document.createElement("div");
   box.className = "confirm";
-  box.innerHTML = `<p>${empty.length?`まだ ぬっていない 問題が あります：${empty.join("・")}。`:"ぜんぶ ぬりました。"}おわって 答えあわせを しますか。</p>
-    <div class="nav"><button class="btn ghost small" id="cNo">もどる</button><button class="btn small" id="cYes">おわる</button></div>`;
+  box.innerHTML = `<p>${empty.length?`まだ ぬっていない 問題が あります：${empty.join("・")}。`:"ぜんぶ ぬりました。"}おわりますか。おわると、こたえは もう かえられません。${ID(`${empty.length?`Masih ada soal yang belum diisi: ${empty.join(", ")}. `:"Semua soal sudah diisi. "}Selesai sekarang? Setelah selesai, jawaban tidak bisa diubah lagi.`)}</p>
+    <div class="nav"><button class="btn ghost small" id="cNo">もどる${ID("Kembali")}</button><button class="btn small" id="cYes">おわる${ID("Selesai")}</button></div>`;
   const old = $("app").querySelector(".confirm"); if(old) old.remove();
   $("app").appendChild(box);
   $("cNo").onclick = () => box.remove();
   $("cYes").onclick = () => submitSec(false);
   box.scrollIntoView({behavior:"smooth",block:"center"});
 }
-function submitSec(timeUp){ stopTimer(); S.done[SEC.id] = true; closeSheet(); result(SEC.id, timeUp); }
+/* セクションが おわったら JLPT の ページに もどって、点数を 見せる */
+function submitSec(timeUp){
+  stopTimer(); S.done[SEC.id] = true; saveRec(); closeSheet();
+  const r = secOk(SEC.id);
+  S.flash = flashHTML(SEC.name, SEC.id, r, timeUp);
+  home();
+}
+/* おわった ときの お知らせ（2行） */
+function flashHTML(name, id, r, timeUp){
+  const left = SECS.filter(s=>!S.done[s.id]).map(s=>s.id).concat(S.done.listen ? [] : ["listen"]);
+  const nm = id => id==="listen" ? LISTEN.name : SECS.find(s=>s.id===id).name;
+  const next = allDone()
+    ? `ぜんぶ おわりました。合計点は 下へ ↓${ID("Semua tes selesai. Lihat nilai total di bawah ↓")}`
+    : `のこり：${left.map(nm).join("、")}${ID(`Tersisa: ${left.map(secShort).join(", ")}`)}`;
+  return `<h3>${name}　${r.ok}/${r.n}問${ID(`${secShort(id)} selesai · Benar ${r.ok}/${r.n}`)}</h3>
+    ${timeUp ? `<p>時間切れ（ぬった ところまで 採点）${ID("Waktu habis")}</p>` : ""}
+    <p>${next}</p>`;
+}
 
 /* ---------- overview answer sheet ---------- */
 $("openSheet").onclick = openSheet;
@@ -355,7 +565,7 @@ function openSheet(){
 }
 function closeSheet(){ $("overlay").hidden = true; $("overlay").innerHTML=""; refreshBubbles(); }
 
-/* ---------- results ---------- */
+/* ---------- results (答えあわせ) ---------- */
 function exHTML(key, ja, id){
   const l = S.ex[key] || "ja";
   return `<div class="tabs"><button aria-pressed="${l==="ja"}" data-ex="${key}" data-l="ja">日本語</button><button aria-pressed="${l==="id"}" data-ex="${key}" data-l="id">Bahasa Indonesia</button></div>
@@ -365,57 +575,46 @@ document.addEventListener("click", e => {
   const t = e.target.closest("[data-ex]"); if(!t) return;
   S.ex[t.dataset.ex] = t.dataset.l; const y = window.scrollY; result(S.view==="result-listen"?"listen":SEC.id); window.scrollTo(0,y);
 });
-const SAVE_HTML = `<div class="card save"><h3>結果を ほぞんする</h3>
-        <p>画像（PNG）で ほぞんして、先生に おくってください。</p>
-        <div><button class="btn" id="dl">画像を ダウンロード</button></div>
-        <img id="pv" alt="結果の画像">
-        <p class="meta">ダウンロードできないときは、上の画像を 長おしして ほぞんしてください。</p></div>`;
-function result(which, timeUp){
+const BACK_HTML = `<div class="nav" style="margin-top:8px"><button class="btn" id="back">JLPTの ページに もどる${ID("Kembali")}</button></div>`;
+function result(which){
   stopTimer(); $("strip").hidden = true;
   if(which!=="listen"){
     SEC = SECS.find(s=>s.id===which);
-    S.view="result"; setHeader("結果　"+SEC.name, false);
+    S.view="result"; setHeader("答えあわせ　"+SEC.name, false);
     const A = S.ans[SEC.id];
     const ok = SEC.items.filter((q,i)=>A[i]===q.a).length;
     const shown = new Set();
     $("app").innerHTML = `
-      <h1>答えあわせ</h1>
-      ${timeUp?`<p class="lead">時間に なりました。ぬった ところまでで 採点しました。</p>`:""}
+      <h1>答えあわせ</h1><p class="lead">Pembahasan</p>
       <div class="card"><div class="score">${ok}<small> / ${SEC.items.length}問</small></div>
-        <p>${SEC.note || ""}</p></div>
+        ${ID(`Benar ${ok} dari ${SEC.items.length} soal`)}</div>
       ${SEC.items.map((q,i)=>{
         const me=A[i], good=me===q.a;
         const pas = q.passage && !shown.has(q.passage) ? (shown.add(q.passage), passageHTML(q.passage, -1)) : "";
-        return `${pas}<div class="rv"><div class="top"><span class="qnum">${i+1}</span><span class="pill ${good?"ok":"ng"}">${good?"せいかい":"まちがい"}</span><span class="meta" style="font-size:12.5px;color:var(--muted)">${q.m}</span></div>
+        return `${pas}<div class="rv"><div class="top"><span class="qnum">${i+1}</span><span class="pill ${good?"ok":"ng"}">${good?`せいかい${ID("Benar")}`:`まちがい${ID("Salah")}`}</span><span class="meta" style="font-size:12.5px;color:var(--muted)">${q.m}</span></div>
           ${q.stem?`<div class="stemsm">${q.stem}</div>`:""}
           ${rowHTML(i+1, me, "r"+i, {lock:true, correct:q.a})}
-          <div class="meta" style="font-size:13px">こたえ：${q.a} ${q.ch[q.a-1]}　／　あなた：${me?me+" "+q.ch[me-1]:"ぬっていない"}</div>
+          <div class="meta" style="font-size:13px">こたえ：${q.a} ${q.ch[q.a-1]}　／　あなた：${me?me+" "+q.ch[me-1]:"ぬっていない"}${ID(`Jawaban benar: ${q.a} ／ Jawabanmu: ${me||"tidak diisi"}`)}</div>
           ${exHTML(SEC.id+i, q.ja, q.id)}</div>`;}).join("")}
-      ${SAVE_HTML}
-      <div class="nav" style="margin-top:8px"><button class="btn ghost" id="back">もどる</button><button class="btn ghost" id="again">もう一度</button></div>`;
-    setupSave(SEC.id);
+      ${BACK_HTML}`;
     $("back").onclick = home;
-    $("again").onclick = () => { S.ans[SEC.id] = Array(SEC.items.length).fill(0); S.done[SEC.id]=false; question(0); };
   } else {
-    S.view="result-listen"; setHeader("結果　聴解", false);
+    S.view="result-listen"; setHeader("答えあわせ　聴解", false);
     const L = LI(); const ok = L.filter(x=>S.lans[x.g]===x.it.a).length;
     $("app").innerHTML = `
-      <h1>答えあわせ</h1>
+      <h1>答えあわせ</h1><p class="lead">Pembahasan</p>
       <div class="card"><div class="score">${ok}<small> / ${L.length}問</small></div>
-        <p>本番の 聴解は 60点中 19点が 基準点です。</p></div>
+        ${ID(`Benar ${ok} dari ${L.length} soal`)}</div>
       ${L.map(x=>{ const it=x.it, me=S.lans[x.g], good=me===it.a;
-        return `${x.it===x.md.items[0]?`<h3 class="mhead">もんだい${x.md.no}</h3>`:""}<div class="rv"><div class="top"><span class="qnum">${it.no}ばん</span><span class="pill ${good?"ok":"ng"}">${good?"せいかい":"まちがい"}</span></div>
+        return `${x.it===x.md.items[0]?`<h3 class="mhead">もんだい${x.md.no}</h3>`:""}<div class="rv"><div class="top"><span class="qnum">${it.no}ばん</span><span class="pill ${good?"ok":"ng"}">${good?`せいかい${ID("Benar")}`:`まちがい${ID("Salah")}`}</span></div>
         <div class="choices one" style="font-family:var(--f-paper)">${it.ch.map((c,k)=>`<div><span class="n">${k+1}</span><span>${c}</span></div>`).join("")}</div>
         ${rowHTML(it.no, me, "rl"+x.g, {lock:true, correct:it.a, n:it.n})}
-        <div class="meta" style="font-size:13px">こたえ：${it.a}　／　あなた：${me||"ぬっていない"}</div>
+        <div class="meta" style="font-size:13px">こたえ：${it.a}　／　あなた：${me||"ぬっていない"}${ID(`Jawaban benar: ${it.a} ／ Jawabanmu: ${me||"tidak diisi"}`)}</div>
         ${exHTML("ls"+x.g, it.ja, it.id)}
-        <details class="scr"><summary>スクリプト</summary><div class="script">${it.script.map(([s,t])=>`<div>${s?`<span class="sp">${s}</span>`:""}${t}</div>`).join("")}</div></details>
-        <div><button class="btn ghost small" data-replay="${x.g}">この 問題を もう一度 聞く</button> <span class="phase" id="ph${x.g}"></span></div></div>`;}).join("")}
-      ${SAVE_HTML}
-      <div class="nav" style="margin-top:8px"><button class="btn ghost" id="back">もどる</button><button class="btn ghost" id="again">もう一度 ためす</button></div>`;
-    setupSave("listen");
+        <details class="scr"><summary>スクリプト ／ Naskah</summary><div class="script">${it.script.map(([s,t])=>`<div>${s?`<span class="sp">${s}</span>`:""}${t}</div>`).join("")}</div></details>
+        <div><button class="btn ghost small" data-replay="${x.g}">この 問題を もう一度 聞く${ID("Dengar lagi")}</button> <span class="phase" id="ph${x.g}"></span></div></div>`;}).join("")}
+      ${BACK_HTML}`;
     $("back").onclick = home;
-    $("again").onclick = () => { S.lans = Array(L.length).fill(0); S.done.listen=false; listen(); };
     $("app").querySelectorAll("[data-replay]").forEach(b => b.onclick = () => {
       const g=+b.dataset.replay; stopAudio();
       playTimeline(L[g].it.timeline.map(s=>({...s,g})), ()=>{ $("ph"+g).textContent=""; }, (ph)=>{ $("ph"+g).textContent = ph; }, m=>{ $("ph"+g).textContent=m; });
@@ -456,11 +655,11 @@ function listen(startMi){
     </section>`;
   $("strip").hidden = false;
   $("stripIn").innerHTML = `<div class="sheetlabel"><span>かいとうようし　Answer Sheet</span><span id="lpos"></span></div><div id="lrow"></div>
-    <div class="nav"><button class="btn ghost small" id="quit">やめる</button><span class="mid"></span><button class="btn small" id="lfin" disabled>答えあわせ</button></div>`;
+    <div class="nav"><button class="btn ghost small" id="quit">やめる</button><span class="mid"></span><button class="btn small" id="lfin" disabled>おわる</button></div>`;
   listenPaper(firstG);
   $("from").onchange = () => listenPaper(L.findIndex(x=>x.mi===+$("from").value));
   $("quit").onclick = () => { stopAudio(); S.playing=false; home(); };
-  $("lfin").onclick = () => { S.done.listen = true; result("listen"); };
+  $("lfin").onclick = finishListen;
   $("play").onclick = async () => {
     const mi0 = +$("from").value;
     $("play").disabled = true; $("from").disabled = true; $("play").textContent = "じゅんびしています";
@@ -475,9 +674,15 @@ function listen(startMi){
         msg => { $("phase").innerHTML = `<b>${msg}</b>`; res(false); }));
       if(!ok){ $("play").disabled = false; $("from").disabled = false; $("play").textContent = "もう一度 ためす"; S.playing=false; return; }
     }
-    if(S.playing){ $("lfin").disabled = false; $("phase").innerHTML = `<b>おわりです。</b><span>答えあわせを おしてください</span>`; $("bar").style.width="100%"; }
+    if(S.playing){ $("lfin").disabled = false; $("phase").innerHTML = `<b>おわりです。</b><span>「おわる」を おしてください</span>`; $("bar").style.width="100%"; }
     S.playing = false;
   };
+}
+function finishListen(){
+  stopAudio(); S.playing = false; S.done.listen = true; saveRec(); closeSheet();
+  const r = secOk("listen");
+  S.flash = flashHTML(LISTEN.name, "listen", r, false);
+  home();
 }
 
 /* ---------- audio engine: decode, trim edge silence, schedule with exact gaps ---------- */
@@ -546,6 +751,7 @@ function stamp(){
   return {txt:`${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`,
           file:`${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}`};
 }
+const CM = '"BIZ UDMincho","Hiragino Mincho ProN",serif', CG = '"BIZ UDPGothic","Hiragino Sans",sans-serif';
 async function drawResult(which){
   try{ await document.fonts.ready; }catch(e){}
   const sec = which==="listen" ? null : SECS.find(s=>s.id===which);
@@ -555,21 +761,23 @@ async function drawResult(which){
   const ok = rows.filter(r=>r.me===r.a).length;
   const W=1080, rowH=76, top=400, H=top+rows.length*rowH+150;
   const c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
-  const M='"BIZ UDMincho","Hiragino Mincho ProN",serif', G='"BIZ UDPGothic","Hiragino Sans",sans-serif';
+  const M=CM, G=CG;
   g.fillStyle="#ffffff"; g.fillRect(0,0,W,H);
   g.strokeStyle="#1c2125"; g.lineWidth=4; g.strokeRect(24,24,W-48,H-48);
   g.fillStyle="#1c2125"; g.textBaseline="alphabetic";
   g.font=`700 44px ${M}`; g.fillText(`JLPT ${TEST.level} 模擬試験　結果`, 64, 110);
   g.font=`400 30px ${G}`; g.fillStyle="#5b646c";
-  g.fillText(sec ? sec.name : "聴解", 64, 160);
+  g.fillText(sec ? sec.name : "聴解", 64, 160); g.font=`400 22px ${G}`; g.fillText(secId(sec ? sec.id : "listen"), 64, 192);
   g.fillStyle="#1c2125"; g.font=`700 36px ${G}`;
   g.fillText(who(), 64, 236);
   g.font=`400 28px ${G}`; g.fillStyle="#5b646c"; g.fillText(stamp().txt, 64, 284);
   g.fillStyle="#1c2125"; g.font=`700 96px ${G}`; const sc=String(ok); g.fillText(sc, W-330, 250);
   const sw=g.measureText(sc).width; g.font=`400 36px ${G}`; g.fillStyle="#5b646c"; g.fillText(` / ${rows.length}問`, W-330+sw, 250);
+  g.font=`400 22px ${G}`; g.fillText(`Benar ${ok} dari ${rows.length} soal`, W-330, 290);
   g.fillStyle="#1c2125"; g.font=`700 26px ${G}`;
   const cols=[64,170,690,830,960];
-  ["番号","問題","あなた","こたえ","結果"].forEach((t,i)=>g.fillText(t, cols[i], top-24));
+  ["番号","問題","あなた","こたえ","結果"].forEach((t,i)=>g.fillText(t, cols[i], top-50));
+  g.fillStyle="#5b646c"; g.font=`400 20px ${G}`; ["No.","Soal","Jawabanmu","Kunci","Hasil"].forEach((t,i)=>g.fillText(t, cols[i], top-22));
   g.fillRect(56, top-8, W-112, 3);
   rows.forEach((r,i)=>{
     const y=top+i*rowH+50, good=r.me===r.a;
@@ -589,11 +797,147 @@ async function setupSave(which){
   const pv = $("pv"); if(pv) pv.src = url;
   const b = $("dl"); if(!b) return;
   b.onclick = () => {
-    const safe = who().replace(/[\\/:*?"<>|\s]+/g,"_");
+    const safe = fileName();
     const a = document.createElement("a");
     a.href = url; a.download = `JLPT-${TEST.level}_${which}_${safe}_${stamp().file}.png`;
     document.body.appendChild(a); a.click(); a.remove();
   };
+}
+/* 合計点と 合否判定の 画像 */
+async function drawTotal(){
+  try{ await document.fonts.ready; }catch(e){}
+  const T = totals(), MD = byMondai();
+  const W=1080, top=800, rowH=66, H=top+MD.length*rowH+200;
+  const c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
+  const INK="#1c2125", MUT="#5b646c", OK="#2e7a4e", NG="#b3261e";
+  g.fillStyle="#ffffff"; g.fillRect(0,0,W,H);
+  g.strokeStyle=INK; g.lineWidth=4; g.strokeRect(24,24,W-48,H-48);
+  g.textBaseline="alphabetic";
+  g.fillStyle=INK; g.font=`700 44px ${CM}`; g.fillText(`JLPT ${TEST.level} 模擬試験　合否判定`, 64, 110);
+  g.fillStyle=MUT; g.font=`400 28px ${CG}`; g.fillText(TEST.title, 64, 156);
+  g.font=`400 22px ${CG}`; g.fillText("Hasil ujian coba JLPT (perkiraan)", 64, 188);
+  g.fillStyle=INK; g.font=`700 38px ${CG}`; g.fillText(who(), 64, 232);
+  g.fillStyle=MUT; g.font=`400 28px ${CG}`; g.fillText(stamp().txt, 64, 278);
+  // 判定
+  const vx=W-404, vy=176, vw=340, vh=130, col=T.pass?OK:NG;
+  g.fillStyle=T.pass?"#e3f1e8":"#f8e2e0"; g.fillRect(vx,vy,vw,vh);
+  g.strokeStyle=col; g.lineWidth=4; g.strokeRect(vx,vy,vw,vh);
+  g.fillStyle=col; g.textAlign="center";
+  g.font=`700 64px ${CG}`; g.fillText(T.pass?"合格":"不合格", vx+vw/2, vy+76);
+  g.font=`400 24px ${CG}`; g.fillText(`（推定）${T.pass?"LULUS":"TIDAK LULUS"}`, vx+vw/2, vy+112);
+  g.textAlign="left";
+  // 区分の 表
+  const cols=[64,500,670,830], ty=380;
+  g.fillStyle=MUT; g.font=`400 24px ${CG}`;
+  ["区分","せいかい","点数（推定）","基準点"].forEach((t,i)=>g.fillText(t, cols[i], ty-26));
+  g.font=`400 19px ${CG}`; ["Bagian","Benar","Nilai","Minimum"].forEach((t,i)=>g.fillText(t, cols[i], ty));
+  g.fillStyle=INK; g.fillRect(56, ty+16, W-112, 3);
+  const line = (y, name, okTxt, pts, max, crit, pass, bold, nid) => {
+    g.fillStyle=INK; g.font=`${bold?700:400} 30px ${CG}`; g.fillText(name, cols[0], y-10);
+    g.fillStyle=MUT; g.font=`400 20px ${CG}`; g.fillText(nid, cols[0], y+20); g.fillStyle=INK;
+    g.font=`400 28px ${CG}`; if(okTxt) g.fillText(okTxt, cols[1], y);
+    g.font=`700 40px ${CG}`; const p=String(pts); g.fillText(p, cols[2], y);
+    const pw=g.measureText(p).width; g.font=`400 26px ${CG}`; g.fillStyle=MUT; g.fillText(` / ${max}`, cols[2]+pw, y);
+    g.fillStyle=INK; g.font=`400 26px ${CG}`; g.fillText(crit, cols[3], y);
+    g.fillStyle=pass?OK:NG; g.font=`700 34px ${CG}`; g.fillText(pass?"○":"×", W-92, y);
+  };
+  line(ty+80, "言語知識・読解", `${T.lkOk}/${T.lkN}`, T.lk, SCORE.lk.max, String(SCORE.lk.min), T.lkPass, false, "Pengetahuan Bahasa & Membaca");
+  g.fillStyle="#d5dad6"; g.fillRect(56, ty+108, W-112, 2);
+  line(ty+170, "聴解", `${T.lsOk}/${T.lsN}`, T.ls, SCORE.ls.max, String(SCORE.ls.min), T.lsPass, false, "Mendengarkan");
+  g.fillStyle=INK; g.fillRect(56, ty+198, W-112, 3);
+  line(ty+262, "総合得点", "", T.total, SCORE.total, `合格点 ${SCORE.pass}`, T.totalPass, true, `Nilai total (batas lulus ${SCORE.pass})`);
+  // 大問ごと
+  g.fillStyle=INK; g.font=`700 28px ${CG}`; g.fillText("大問ごとの せいかい", 64, top-48); g.fillStyle=MUT; g.font=`400 20px ${CG}`; g.fillText("Jawaban benar per mondai", 64, top-18);
+  MD.forEach((o,i)=>{
+    const y=top+i*rowH+36, r=o.ok/o.n;
+    g.fillStyle=INK; g.font=`400 26px ${CG}`; g.fillText(o.k, 64, y-6);
+    g.fillStyle=MUT; g.font=`400 18px ${CG}`; g.fillText(o.kid||"", 64, y+18);
+    g.fillStyle="#e4e8e5"; g.fillRect(470, y-20, 400, 18);
+    g.fillStyle=INK; g.fillRect(470, y-20, Math.round(400*r), 18);
+    g.font=`700 26px ${CG}`; g.textAlign="right"; g.fillText(`${o.ok}/${o.n}`, W-64, y); g.textAlign="left";
+  });
+  g.fillStyle=MUT; g.font=`400 22px ${CG}`;
+  g.fillText("点数は せいかいの 数から 出した 目安です（本番は 得点調整が あります）。", 64, H-130);
+  g.fillText("Nilai ini perkiraan dari jumlah jawaban benar (ujian sebenarnya memakai penyesuaian nilai).", 64, H-98);
+  g.fillText(`IJFA トレーニングセンター　JLPT ${TEST.level} ${TEST.title}`, 64, H-60);
+  return c;
+}
+
+/* ---------- まちがえた 問題（やりなおし用の ファイル） ---------- */
+function reviewHTML(){
+  const T = totals(), base = location.href.split(/[?#]/)[0].replace(/[^/]*$/, "");
+  const det = (ansTxt, ja, id, extra="") => `<details><summary>こたえと せつめいを 見る ／ Lihat jawaban</summary>
+      <p class="ans">こたえ：${ansTxt}<span class="idt">Jawaban benar</span></p><p>${ja}</p><p class="id">${id}</p>${extra}</details>`;
+  let body = "", count = 0;
+  SECS.forEach(sec => {
+    const wrong = sec.items.map((q,i)=>({q, i, me:S.ans[sec.id][i]})).filter(x=>x.me!==x.q.a);
+    if(!wrong.length) return;
+    body += `<h2>${sec.name}<span>${wrong.length}問</span></h2><p class="note">${secId(sec.id)} – ${wrong.length} soal</p>`;
+    const shown = new Set();
+    wrong.forEach(({q,i,me}) => {
+      count++;
+      const pas = q.passage && !shown.has(q.passage) ? (shown.add(q.passage), passageHTML(q.passage, -1, sec)) : "";
+      body += `${pas}<div class="q"><div class="top"><b class="no">${i+1}</b><span>${q.m}　${mondaiId(q.m)}</span></div>
+        <p class="ins">${q.ins}</p>
+        ${q.stem ? `<div class="stem">${q.stem}</div>` : ""}
+        <ol class="ch">${q.ch.map(c=>`<li>${c}</li>`).join("")}</ol>
+        <p class="me">あなたの こたえ：${me ? me : "ぬっていない"}<span class="idt">Jawabanmu: ${me ? me : "tidak diisi"}</span></p>
+        ${det(`${q.a}　${q.ch[q.a-1]}`, q.ja, q.id)}</div>`;
+    });
+  });
+  const L = LI(), lw = L.filter(x=>S.lans[x.g]!==x.it.a);
+  if(lw.length){
+    body += `<h2>${LISTEN.name}<span>${lw.length}問</span></h2><p class="note">音声は JLPTの ページの 答えあわせで もう一度 聞けます。スクリプトは せつめいの 中に あります。<span class="idt">Audio bisa didengar lagi di pembahasan pada halaman JLPT. Naskah ada di dalam penjelasan.</span></p>`;
+    lw.forEach(x => {
+      count++;
+      const it = x.it, me = S.lans[x.g];
+      const pic = it.img ? `<img src="${base}${it.img}" alt="${esc(it.imgDesc||"")}">` : "";
+      const scr = `<div class="scr">${it.script.map(([s,t])=>`<div>${s?`<b>${s}</b> `:""}${t}</div>`).join("")}</div>`;
+      body += `<div class="q"><div class="top"><b class="no">${it.no}ばん</b><span>聴解 もんだい${x.md.no}　Mendengarkan – Mondai ${x.md.no}</span></div>
+        ${pic}<ol class="ch">${it.ch.map(c=>`<li>${c}</li>`).join("")}</ol>
+        <p class="me">あなたの こたえ：${me ? me : "ぬっていない"}<span class="idt">Jawabanmu: ${me ? me : "tidak diisi"}</span></p>
+        ${det(`${it.a}　${it.ch[it.a-1]}`, it.ja, it.id, scr)}</div>`;
+    });
+  }
+  if(!count) body = `<p class="good">まちがえた 問題は ありません。すばらしい！<span class="idt">Tidak ada soal yang salah. Hebat!</span></p>`;
+  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>まちがえた問題｜JLPT ${TEST.level} ${esc(TEST.title)}｜${esc(who())}</title>
+<style>
+body{margin:0;background:#f6f7f5;color:#1c2125;font-family:"Hiragino Sans","Yu Gothic","Noto Sans JP",system-ui,sans-serif;font-size:15px;line-height:1.7}
+.wrap{max-width:640px;margin:0 auto;padding:16px 16px 48px}
+h1{font-size:21px;margin:8px 0 4px}h2{font-size:17px;margin:28px 0 10px;border-bottom:2px solid #1c2125;padding-bottom:4px;display:flex;justify-content:space-between}
+h2 span{font-size:13px;font-weight:400;color:#5b646c}
+.sum{background:#fff;border:1px solid #d5dad6;border-radius:8px;padding:12px 14px;font-size:14px}
+.sum b{font-size:17px}.pass{color:#2e7a4e;font-weight:700}.fail{color:#b3261e;font-weight:700}
+.q{background:#fff;border:1px solid #d5dad6;border-radius:8px;padding:14px;margin-bottom:12px}
+.top{display:flex;gap:10px;align-items:center;font-size:12.5px;color:#5b646c}.no{border:1.5px solid #1c2125;color:#1c2125;padding:0 7px;font-size:13px}
+.ins{font-size:12.5px;color:#5b646c;margin:6px 0}.stem{font-size:18px;line-height:2;margin:6px 0}
+.stem u{text-underline-offset:5px}.word{display:inline-block;border:1.5px solid #1c2125;padding:0 10px}
+.blank{display:inline-block;min-width:2.6em;border-bottom:1.5px solid #1c2125;margin:0 2px;text-align:center}
+.ch{margin:6px 0;padding-left:1.8em;font-size:16px}.ch li{margin:2px 0}
+.me{font-size:13.5px;color:#b3261e;margin:6px 0}
+details{border-top:1px dashed #d5dad6;margin-top:8px;padding-top:6px}summary{cursor:pointer;color:#22385a;font-weight:700;font-size:14px}
+.ans{font-weight:700;color:#2e7a4e}.id{color:#5b646c}
+.passage{background:#fff;border:1px solid #d5dad6;border-radius:4px;padding:12px 14px;margin:0 0 12px;line-height:2}
+.passage .ttl{font-weight:700}.passage .mk{font-weight:700}
+.info{border-collapse:collapse;width:100%;font-size:13px;line-height:1.5}.info th,.info td{border:1px solid #1c2125;padding:4px}
+img{max-width:100%;border:1px solid #d5dad6;border-radius:4px;margin:6px 0}
+.scr{font-size:14px;background:#f6f7f5;border-radius:6px;padding:8px 10px;margin-top:6px}.scr b{font-size:12px;color:#5b646c}
+.note{font-size:13px;color:#5b646c}.good{font-size:18px;font-weight:700;color:#2e7a4e}
+.foot{font-size:12px;color:#5b646c;margin-top:28px}
+.idt{display:block;font-size:12px;color:#5b646c;font-weight:400;line-height:1.5}.ans .idt,.me .idt{display:inline;margin-left:6px}
+</style></head><body><div class="wrap">
+<h1>まちがえた 問題 ／ Soal yang salah</h1>
+<p class="note">JLPT ${TEST.level} ${esc(TEST.title)}　${esc(who())}　${stamp().txt}</p>
+<div class="sum">判定：<span class="${T.pass?"pass":"fail"}">${T.pass?"合格":"不合格"}（推定）</span>　総合 <b>${T.total}</b>/${SCORE.total}
+<span class="idt">Hasil: ${T.pass?"LULUS":"TIDAK LULUS"} (perkiraan) ／ Nilai total ${T.total}/${SCORE.total}</span>
+言語知識・読解 ${T.lk}/${SCORE.lk.max}（基準点 ${SCORE.lk.min}）　聴解 ${T.ls}/${SCORE.ls.max}（基準点 ${SCORE.ls.min}）
+<span class="idt">Pengetahuan Bahasa & Membaca ${T.lk}/${SCORE.lk.max} (minimum ${SCORE.lk.min}) ／ Mendengarkan ${T.ls}/${SCORE.ls.max} (minimum ${SCORE.ls.min})</span>
+まちがえた 問題・ぬらなかった 問題：${count}問<span class="idt">Soal yang salah atau tidak diisi: ${count}</span></div>
+<p class="note">まず 自分で もう一度 といて から、「こたえと せつめいを 見る」を おして ください。<br>Coba jawab lagi dulu, lalu tekan "Lihat jawaban".</p>
+${body}
+<p class="foot">IJFA トレーニングセンター　JLPT ${TEST.level} ${esc(TEST.title)}</p>
+</div></body></html>`;
 }
 
 async function boot(){
@@ -604,12 +948,14 @@ async function boot(){
     TEST = all.find(t => t.id === want) || all.find(t => t.level === "N4") || all[0];
     const data = await (await fetch(TEST.id + ".json?t=" + Date.now())).json();
     SECS = data.sections; LISTEN = data.listen; VERSION = data.version || ""; BREAKS = data.breaks || [];
+    SCORE = data.scoring || SCORE_DEFAULT;
   }catch(e){
     $("app").innerHTML = '<p class="lead" style="margin-top:24px">問題を 読みこめませんでした。インターネットの 接続を たしかめて、ページを 読みこみなおして ください。</p>';
     return;
   }
   initState();
   try{ S.name = localStorage.getItem("jlptName") || ""; }catch(e){}
+  loadRec();
   home();
 }
 boot();
