@@ -52,14 +52,24 @@ button{font:inherit;cursor:pointer}
 .paper{font-family:var(--f-paper);background:var(--sheet-bg);border:1px solid var(--rule);border-radius:4px;padding:18px 16px;margin-top:16px}
 .mondai{display:flex;gap:10px;align-items:baseline;margin-bottom:12px}
 .mondai b{border:1.5px solid var(--ink);padding:0 8px;font-size:15px;white-space:nowrap}
-.mondai p{margin:0;font-size:14px;line-height:1.8}
+.mondai p{margin:0;font-size:calc(14px*var(--z,1));line-height:2}
 .qnum{font-family:var(--f-ui);font-weight:700;display:inline-block;min-width:1.6em;border:1.5px solid var(--ink);text-align:center;margin-right:8px;font-size:13px;line-height:1.5}
-.stem{font-size:19px;line-height:2.1;margin:6px 0 14px;word-break:keep-all;overflow-wrap:anywhere}
+/* 分かち書きなしの 文でも 自然に 折りかえす（keep-all は 使わない） */
+.stem{font-size:calc(19px*var(--z,1));line-height:2.2;margin:6px 0 14px;word-break:normal;line-break:strict;overflow-wrap:break-word}
+/* 文節の 切れめで 折りかえす（Chrome 119 以降。Safari は ふつうの 折りかえし）。画面に スペースは 出ない */
+.stem,.passage,.choices,.mondai p,.rv .stemsm,.script{word-break:auto-phrase}
+/* ★の 4つの わく は 1行に まとめる */
+.slots{display:inline-block;white-space:nowrap;margin:0 2px}
+.slots .blank{min-width:2.4em}
+.blank:empty::before{content:"\00a0"}
 .stem u{text-decoration-thickness:1.5px;text-underline-offset:6px}
+/* ルビ：タップしなくても 見える。行間は 上の line-height で 確保 */
+ruby{ruby-position:over;ruby-align:center}
+rt{font-size:.5em;line-height:1;font-family:var(--f-paper);font-weight:400;letter-spacing:0;user-select:none;-webkit-user-select:none}
 .star{font-family:var(--f-ui)}
-.word{display:inline-block;border:1.5px solid var(--ink);padding:0 12px;font-size:20px}
+.word{display:inline-block;border:1.5px solid var(--ink);padding:0 12px;font-size:calc(20px*var(--z,1));line-height:2}
 .blank{display:inline-block;min-width:3.2em;border-bottom:1.5px solid var(--ink);text-align:center;margin:0 2px}
-.choices{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:17px}
+.choices{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:calc(17px*var(--z,1));line-height:2}
 .choices.one{display:grid;grid-template-columns:1fr}
 .choices div{display:flex;gap:8px;min-width:0}
 .choices span.n{font-family:var(--f-ui);font-weight:700}
@@ -111,7 +121,7 @@ button .idt{color:inherit;opacity:.85;font-size:11px}
 .pill{font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px}
 .pill.ok{background:var(--ok-soft);color:var(--ok)}
 .pill.ng{background:var(--ng-soft);color:var(--ng)}
-.rv .stemsm{font-family:var(--f-paper);font-size:16px;line-height:1.9;overflow-wrap:anywhere}
+.rv .stemsm{font-family:var(--f-paper);font-size:calc(16px*var(--z,1));line-height:2.1;overflow-wrap:break-word;line-break:strict}
 .ex{font-size:13.5px;line-height:1.7}
 .ex .id{color:var(--muted)}
 .tabs{display:flex;gap:6px}
@@ -157,7 +167,7 @@ details.more summary{cursor:pointer;font-size:13px;color:var(--muted)}
 .prog i{display:block;height:100%;width:0;background:var(--sheet);transition:width .25s linear}
 .phase{font-size:13.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums}
 .phase b{color:var(--ink)}
-.script{font-family:var(--f-paper);font-size:15px;line-height:1.9;display:grid;gap:4px}
+.script{font-family:var(--f-paper);font-size:calc(15px*var(--z,1));line-height:2.1;display:grid;gap:4px}
 .script .sp{font-family:var(--f-ui);font-size:12px;color:var(--muted);margin-right:6px}
 .confirm{border:1.5px solid var(--sheet);background:var(--sheet-soft);border-radius:8px;padding:12px;display:grid;gap:10px;margin-top:14px}
 .confirm p{margin:0;font-size:14px;color:var(--ink)}
@@ -176,10 +186,13 @@ details.more summary{cursor:pointer;font-size:13px;color:var(--muted)}
 .lvb.off{opacity:.5}
 .one-field{display:grid;gap:4px;font-size:12.5px;color:var(--muted)}
 .one-field input{font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%}
-.passage{font-family:var(--f-paper);font-size:15.5px;line-height:2;border:1px solid var(--rule);border-radius:4px;padding:12px 14px;margin:4px 0 14px;max-height:36vh;overflow:auto;background:var(--paper)}
+.passage{font-family:var(--f-paper);font-size:calc(15.5px*var(--z,1));line-height:2.2;line-break:strict;overflow-wrap:break-word;border:1px solid var(--rule);border-radius:4px;padding:12px 14px;margin:4px 0 14px;max-height:42vh;overflow:auto;background:var(--paper)}
 .passage .ttl{font-weight:700;margin:0 0 6px}
 .passage p{margin:6px 0}
-.info{border-collapse:collapse;width:100%;font-size:13px;line-height:1.5;font-family:var(--f-ui)}
+.info{border-collapse:collapse;width:100%;font-size:calc(13px*var(--z,1));line-height:1.9;font-family:var(--f-ui);table-layout:fixed}
+.info td,.info th{overflow-wrap:break-word}
+/* 文字の 大きさ ボタン */
+.zbtn{font-family:var(--f-ui);min-width:2.6em}
 .info th,.info td{border:1px solid var(--ink);padding:4px 5px;vertical-align:top}
 .info th{background:var(--sheet-soft);font-weight:700}
 .passage .mk{font-family:var(--f-ui);font-weight:700;padding:0 2px}
@@ -201,6 +214,7 @@ details.more summary{cursor:pointer;font-size:13px;color:var(--muted)}
 <header class="bar"><div class="in">
   <div class="sec" id="secName">JLPT 模擬試験</div>
   <div class="timer" id="timer" hidden></div>
+  <button class="btn ghost small zbtn" id="zoomBtn" aria-label="文字の 大きさを かえる">あ＋</button>
   <button class="btn ghost small" id="openSheet" hidden>解答用紙</button>
 </div></header>
 
@@ -213,6 +227,16 @@ let SECS, LISTEN, S, SEC, BREAKS = [], SCORE;
 let CATALOG = null, TEST = null, VERSION = "";
 /* 得点区分（N4・N5）。N3 など 区分が ちがう ときは データの scoring で かえる */
 const SCORE_DEFAULT = {lk:{name:"言語知識（文字・語彙・文法）・読解", max:120, min:38}, ls:{name:"聴解", max:60, min:19}, pass:90, total:180};
+/* 得点区分を「区分の リスト（parts）」に そろえる。
+   parts の src：{sec:"vocab"}＝その セクション ぜんぶ、{sec:"grammar", m:"文法"}＝大問名が「文法」で はじまる 問題だけ、{listen:true}＝聴解。
+   データに parts が ない（N4・N5 の 書き方）ときは、2区分（言語知識・読解／聴解）に する */
+function normScore(sc){
+  if(sc && Array.isArray(sc.parts)) return sc;
+  sc = sc || SCORE_DEFAULT;
+  return {pass:sc.pass, total:sc.total, parts:[
+    {key:"lk", name:"言語知識・読解", id:"Bahasa & Membaca", idLong:"Pengetahuan Bahasa & Membaca", max:sc.lk.max, min:sc.lk.min, src:[{all:true}]},
+    {key:"ls", name:"聴解", id:"Mendengarkan", idLong:"Mendengarkan", max:sc.ls.max, min:sc.ls.min, src:[{listen:true}]}]};
+}
 function initState(){
   S = {name:"", view:"home", idx:0, ans:{}, done:{}, tend:{}, listen:0, timerEnd:0, timerId:0, ex:{}, playing:false, flash:""};
   SECS.forEach(sec => { S.ans[sec.id] = Array(sec.items.length).fill(0); S.done[sec.id] = false; });
@@ -222,13 +246,16 @@ function initState(){
 const $ = id => document.getElementById(id);
 const who = () => S.name || "No name";
 const ID = t => `<span class="idt">${t}</span>`;
+const KJ = () => !!TEST && ["N3","N2","N1"].includes(TEST.level);
+const MDW = n => KJ() ? `問題${n}` : `もんだい${n}`;
+const BANW = n => KJ() ? `${n}番` : `${n}ばん`;
 const SHORT_ID = {vocab:"Kosakata", grammar:"Tata Bahasa & Membaca", listen:"Mendengarkan"};
 const secShort = id => SHORT_ID[id] || secId(id);
 const secId = id => id==="listen" ? (LISTEN.nameId || LISTEN.name) : (SECS.find(s=>s.id===id).nameId || SECS.find(s=>s.id===id).name);
 /* 大問の 名前を インドネシア語に */
 function mondaiId(k){
   const map = [["文字・語彙","Kosakata"],["文法","Tata bahasa"],["読解","Membaca"],["聴解","Mendengarkan"]];
-  const f = map.find(([j])=>k.startsWith(j)); const n = (k.match(/もんだい\s*(\d+)/)||[])[1];
+  const f = map.find(([j])=>k.startsWith(j)); const n = (k.match(/(?:もんだい|問題)\s*(\d+)/)||[])[1];
   return f ? `${f[1]}${n?" – Mondai "+n:""}` : "";
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -259,12 +286,22 @@ function secOk(id){
   return {ok:sec.items.filter((q,i)=>S.ans[id][i]===q.a).length, n:sec.items.length};
 }
 const allDone = () => SECS.every(s=>S.done[s.id]) && S.done.listen;
+/* 区分ごとの せいかい数と 点数（せいかいの 割合 × 満点。本番の 得点調整は ない ので 推定） */
+function partCount(p){
+  let ok = 0, n = 0;
+  p.src.forEach(r => {
+    if(r.listen){ const l = secOk("listen"); ok += l.ok; n += l.n; return; }
+    SECS.forEach(sec => {
+      if(!r.all && r.sec !== sec.id) return;
+      sec.items.forEach((q,i) => { if(r.m && !q.m.startsWith(r.m)) return; n++; if(S.ans[sec.id][i]===q.a) ok++; });
+    });
+  });
+  return {ok, n};
+}
 function totals(){
-  const lkOk = SECS.reduce((a,s)=>a+secOk(s.id).ok,0), lkN = SECS.reduce((a,s)=>a+s.items.length,0);
-  const l = secOk("listen");
-  const lk = Math.round(lkOk/lkN*SCORE.lk.max), ls = Math.round(l.ok/l.n*SCORE.ls.max);
-  const total = lk + ls, lkPass = lk>=SCORE.lk.min, lsPass = ls>=SCORE.ls.min, totalPass = total>=SCORE.pass;
-  return {lkOk, lkN, lsOk:l.ok, lsN:l.n, lk, ls, total, lkPass, lsPass, totalPass, pass: lkPass && lsPass && totalPass};
+  const parts = SCORE.parts.map(p => { const c = partCount(p); const pts = c.n ? Math.round(c.ok/c.n*p.max) : 0; return {...p, ok:c.ok, n:c.n, pts, pass:pts>=p.min}; });
+  const total = parts.reduce((a,p)=>a+p.pts,0), totalPass = total>=SCORE.pass;
+  return {parts, total, totalPass, pass: totalPass && parts.every(p=>p.pass)};
 }
 function byMondai(){
   const out = [];
@@ -274,7 +311,7 @@ function byMondai(){
     out.push(...m.values());
   });
   const L = LI();
-  LISTEN.mondai.forEach(md => { const o = {k:`聴解 もんだい${md.no}`, kid:`Mendengarkan – Mondai ${md.no}`, ok:0, n:0}; L.filter(x=>x.md===md).forEach(x=>{ o.n++; if(S.lans[x.g]===x.it.a) o.ok++; }); out.push(o); });
+  LISTEN.mondai.forEach(md => { const o = {k:`聴解 ${MDW(md.no)}`, kid:`Mendengarkan – Mondai ${md.no}`, ok:0, n:0}; L.filter(x=>x.md===md).forEach(x=>{ o.n++; if(S.lans[x.g]===x.it.a) o.ok++; }); out.push(o); });
   return out;
 }
 
@@ -363,7 +400,7 @@ function home(){
     <div class="card" id="card-listen">
       <h3>${LISTEN.name}${S.done.listen?`<span class="tag done">おわり${ID("Selesai")}</span>`:""}${LISTEN.nameId ? `<span class="idn">${LISTEN.nameId}</span>` : ""}</h3>
       ${S.done.listen ? scoreLine("listen") : `<p>${LISTEN.desc || ""}</p>`}
-      <div class="meta">${LI().length}問 ・ やく 30分（本番は ${LISTEN.minutes}分）</div>
+      <div class="meta">${LI().length}問 ・ やく ${LISTEN.approx || 30}分（本番は ${LISTEN.minutes}分）</div>
       <div><button class="btn${S.done.listen?" ghost":""}" id="goListen">${S.done.listen?`答えあわせを 見る${ID("Lihat pembahasan")}`:"はじめる"}</button></div>
     </div>
     ${started ? `<div class="card" id="resetCard">
@@ -406,8 +443,7 @@ function totalCard(){
   const T = totals();
   const mark = p => p ? `<span class="ok-t">○</span>` : `<span class="ng-t">×</span>`;
   const why = [];
-  if(!T.lkPass) why.push(["言語知識・読解が 基準点に とどいていません", "Bahasa & Membaca belum mencapai nilai minimum"]);
-  if(!T.lsPass) why.push(["聴解が 基準点に とどいていません", "Mendengarkan belum mencapai nilai minimum"]);
+  T.parts.forEach(p => { if(!p.pass) why.push([`${p.name}が 基準点に とどいていません`, `${p.id} belum mencapai nilai minimum`]); });
   if(!T.totalPass) why.push(["総合が 合格点に とどいていません", "Nilai total belum mencapai batas lulus"]);
   const bars = byMondai().map(o=>`<div><span>${o.k}${o.kid?ID(o.kid):""}</span><i><b style="width:${Math.round(o.ok/o.n*100)}%"></b></i><span>${o.ok}/${o.n}</span></div>`).join("");
   return `<div class="card total" id="totalCard">
@@ -417,13 +453,12 @@ function totalCard(){
     <table class="tot">
       <thead><tr><th>区分</th><th class="r">点数${ID("Nilai")}</th><th class="r">基準点${ID("Minimum")}</th></tr></thead>
       <tbody>
-        <tr><td>言語知識・読解${ID("Bahasa & Membaca")}</td><td class="r"><b>${T.lk}</b> / ${SCORE.lk.max}<small>${T.lkOk}/${T.lkN}問</small></td><td class="r">${SCORE.lk.min} ${mark(T.lkPass)}</td></tr>
-        <tr><td>聴解${ID("Mendengarkan")}</td><td class="r"><b>${T.ls}</b> / ${SCORE.ls.max}<small>${T.lsOk}/${T.lsN}問</small></td><td class="r">${SCORE.ls.min} ${mark(T.lsPass)}</td></tr>
+        ${T.parts.map(p=>`<tr><td>${p.name}${ID(p.id)}</td><td class="r"><b>${p.pts}</b> / ${p.max}<small>${p.ok}/${p.n}問</small></td><td class="r">${p.min} ${mark(p.pass)}</td></tr>`).join("")}
         <tr class="sum"><td>総合${ID("Total")}</td><td class="r"><b>${T.total}</b> / ${SCORE.total}</td><td class="r">${SCORE.pass} ${mark(T.totalPass)}</td></tr>
       </tbody>
     </table>
     <details class="more"><summary>※ 推定の 点数です（くわしく）${ID("Nilai perkiraan (detail)")}</summary>
-      <p class="meta">本番は 得点調整が あるので、せいかいの 数から 出した 目安です。合格は、総合 ${SCORE.pass}点 以上、かつ 2つの 区分が 基準点 以上。${ID(`Ujian sebenarnya memakai penyesuaian nilai. Lulus jika total ${SCORE.pass}+ dan kedua bagian mencapai minimum.`)}</p></details>
+      <p class="meta">本番は 得点調整が あるので、せいかいの 数から 出した 目安です。合格は、総合 ${SCORE.pass}点 以上、かつ ${T.parts.length===2?"2つの":"すべての"} 区分が 基準点 以上。${ID(`Ujian sebenarnya memakai penyesuaian nilai. Lulus jika total ${SCORE.pass}+ dan ${T.parts.length===2?"kedua":"semua"} bagian mencapai minimum.`)}</p></details>
     <details class="more"><summary>大問ごとの せいかい${ID("Benar per mondai")}</summary><div class="bars">${bars}</div></details>
     <div class="btnrow"><button class="btn" id="dlTotal">⬇ 結果の 画像を 保存する${ID("Simpan gambar hasil")}</button><button class="btn ghost" id="dlReview">⬇ まちがえた 問題を ダウンロードする${ID("Unduh soal yang salah (untuk latihan ulang)")}</button></div>
     <details class="more"><summary>画像を 見る（保存できないときは 長おし）${ID("Lihat gambar (tekan lama untuk simpan)")}</summary>
@@ -548,7 +583,7 @@ function openSheet(){
     const ov = $("overlay"), L = LI();
     ov.innerHTML = `<div class="sheetpanel" role="dialog" aria-label="解答用紙">
       <div class="head"><h2>かいとうようし　聴解</h2><button class="btn ghost small" id="close">とじる</button></div>
-      <div class="grid">${LISTEN.mondai.map((md,mi)=>`<p class="lead" style="margin:6px 0 0">もんだい${md.no}</p>`+md.items.map(it=>{const g=L.findIndex(x=>x.it===it);return rowHTML(it.no,S.lans[g],"listen:"+g,{n:it.n});}).join("")).join("")}</div></div>`;
+      <div class="grid">${LISTEN.mondai.map((md,mi)=>`<p class="lead" style="margin:6px 0 0">${MDW(md.no)}</p>`+md.items.map(it=>{const g=L.findIndex(x=>x.it===it);return rowHTML(it.no,S.lans[g],"listen:"+g,{n:it.n});}).join("")).join("")}</div></div>`;
     ov.hidden = false; $("close").onclick = closeSheet; ov.onclick = e => { if(e.target===ov) closeSheet(); };
     return;
   }
@@ -606,7 +641,7 @@ function result(which){
       <div class="card"><div class="score">${ok}<small> / ${L.length}問</small></div>
         ${ID(`Benar ${ok} dari ${L.length} soal`)}</div>
       ${L.map(x=>{ const it=x.it, me=S.lans[x.g], good=me===it.a;
-        return `${x.it===x.md.items[0]?`<h3 class="mhead">もんだい${x.md.no}</h3>`:""}<div class="rv"><div class="top"><span class="qnum">${it.no}ばん</span><span class="pill ${good?"ok":"ng"}">${good?`せいかい${ID("Benar")}`:`まちがい${ID("Salah")}`}</span></div>
+        return `${x.it===x.md.items[0]?`<h3 class="mhead">${MDW(x.md.no)}</h3>`:""}<div class="rv"><div class="top"><span class="qnum">${BANW(it.no)}</span><span class="pill ${good?"ok":"ng"}">${good?`せいかい${ID("Benar")}`:`まちがい${ID("Salah")}`}</span></div>
         <div class="choices one" style="font-family:var(--f-paper)">${it.ch.map((c,k)=>`<div><span class="n">${k+1}</span><span>${c}</span></div>`).join("")}</div>
         ${rowHTML(it.no, me, "rl"+x.g, {lock:true, correct:it.a, n:it.n})}
         <div class="meta" style="font-size:13px">こたえ：${it.a}　／　あなた：${me||"ぬっていない"}${ID(`Jawaban benar: ${it.a} ／ Jawabanmu: ${me||"tidak diisi"}`)}</div>
@@ -629,16 +664,20 @@ function listenPaper(gi){
   const L = LI(), x = L[gi]; if(!x) return;
   S.lcur = gi;
   const it = x.it, md = x.md, first = x.it === md.items[0];
+  /* 問題用紙に 出す もの：md.paper（"choices"＝選択肢、"image"＝絵、"none"＝なし）。
+     ない ときは N4 の 形（もんだい1・2＝選択肢、3＝絵、4＝なし）。絵（it.img）は "none" 以外なら 出す。
+     音声だけの 選択肢（"image"・"none"）は、問題用紙に 出さない */
+  const mode = md.paper || (md.no<=2 ? "choices" : md.no===3 ? "image" : "none");
   let body = "";
-  if(md.no<=2) body = `<div class="choices one">${it.ch.map((c,k)=>`<div><span class="n">${k+1}</span><span>${c}</span></div>`).join("")}</div>`;
-  else if(md.no===3) body = `<figure class="pic"><img src="${it.img}?v=${encodeURIComponent(VERSION)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'picalt',textContent:'（え）${it.imgDesc.replace(/'/g,"")}'}))"></figure>`;
-  else body = `<p class="note" style="margin:6px 0 0">えなどは ありません。</p>`;
+  if(it.img && mode!=="none") body += `<figure class="pic"><img src="${it.img}?v=${encodeURIComponent(VERSION)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'picalt',textContent:'（え）${(it.imgDesc||"").replace(/'/g,"")}'}))"></figure>`;
+  if(mode==="choices") body += `<div class="choices one">${(it.chPaper||it.ch).map((c,k)=>`<div><span class="n">${k+1}</span><span>${c}</span></div>`).join("")}</div>`;
+  if(mode==="none") body += `<p class="note" style="margin:6px 0 0">${md.paperNote || "えなどは ありません。"}</p>`;
   $("lpaper").innerHTML = `
-      ${first ? `<div class="mondai"><b>もんだい${md.no}</b><p>${md.ins}</p></div>` : `<div class="mondai"><b>もんだい${md.no}</b></div>`}
-      <div class="stem" style="font-size:17px"><span class="qnum" style="min-width:2.6em">${it.no}ばん</span></div>
+      ${first ? `<div class="mondai"><b>${MDW(md.no)}</b><p>${md.ins}</p></div>` : `<div class="mondai"><b>${MDW(md.no)}</b></div>`}
+      <div class="stem" style="font-size:17px"><span class="qnum" style="min-width:2.6em">${BANW(it.no)}</span></div>
       ${body}`;
   $("lrow").innerHTML = rowHTML(it.no, S.lans[gi], "listen:"+gi, {n:it.n});
-  $("lpos").textContent = `もんだい${md.no}　${it.no}ばん`;
+  $("lpos").textContent = `${MDW(md.no)}　${BANW(it.no)}`;
 }
 function listen(startMi){
   S.view="listen"; setHeader(LISTEN.name, true); stopTimer();
@@ -650,7 +689,7 @@ function listen(startMi){
         <div class="prog"><i id="bar"></i></div>
         <div class="phase" id="phase"><span>音声は 1回だけ ながれます。とちゅうで とめられません。</span><span></span></div>
         <div class="startrow"><button class="btn" id="play">音声を はじめる</button>
-          <label class="msel">はじめる ところ <select id="from">${LISTEN.mondai.map((md,mi)=>`<option value="${mi}" ${mi===(startMi||0)?"selected":""}>もんだい${md.no}から</option>`).join("")}</select></label></div>
+          <label class="msel">はじめる ところ <select id="from">${LISTEN.mondai.map((md,mi)=>`<option value="${mi}" ${mi===(startMi||0)?"selected":""}>${MDW(md.no)}から</option>`).join("")}</select></label></div>
       </div>
     </section>`;
   $("strip").hidden = false;
@@ -666,7 +705,7 @@ function listen(startMi){
     S.playing = true;
     for(let mi=mi0; mi<LISTEN.mondai.length && S.playing; mi++){
       const md = LISTEN.mondai[mi];
-      const steps = [{f:md.insFile, gap:2.0, ph:`もんだい${md.no}の せつめい`, g:L.findIndex(x=>x.mi===mi)}];
+      const steps = [{f:md.insFile, gap:2.0, ph:`${MDW(md.no)}の せつめい`, g:L.findIndex(x=>x.mi===mi)}];
       md.items.forEach((it,ii)=>{ const g=L.findIndex(x=>x.mi===mi && x.it===it); it.timeline.forEach(s=>steps.push({...s, g})); });
       const ok = await new Promise(res => playTimeline(steps, () => res(true),
         (ph, left, frac, g) => { if(g!==S.lcur) listenPaper(g); $("play").textContent = "ながれています";
@@ -757,7 +796,7 @@ async function drawResult(which){
   const sec = which==="listen" ? null : SECS.find(s=>s.id===which);
   const rows = sec
     ? sec.items.map((q,i)=>({no:String(i+1), kind:q.m.replace("　"," "), me:S.ans[sec.id][i], a:q.a}))
-    : LI().map(x=>({no:`${x.it.no}`, kind:`聴解 もんだい${x.md.no}`, me:S.lans[x.g], a:x.it.a}));
+    : LI().map(x=>({no:`${x.it.no}`, kind:`聴解 ${MDW(x.md.no)}`, me:S.lans[x.g], a:x.it.a}));
   const ok = rows.filter(r=>r.me===r.a).length;
   const W=1080, rowH=76, top=400, H=top+rows.length*rowH+150;
   const c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
@@ -807,7 +846,8 @@ async function setupSave(which){
 async function drawTotal(){
   try{ await document.fonts.ready; }catch(e){}
   const T = totals(), MD = byMondai();
-  const W=1080, top=800, rowH=66, H=top+MD.length*rowH+200;
+  const NP = T.parts.length, ty=380, sumY = ty+80+NP*90+2, top = sumY+158;
+  const W=1080, rowH=66, H=top+MD.length*rowH+200;
   const c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
   const INK="#1c2125", MUT="#5b646c", OK="#2e7a4e", NG="#b3261e";
   g.fillStyle="#ffffff"; g.fillRect(0,0,W,H);
@@ -827,7 +867,7 @@ async function drawTotal(){
   g.font=`400 24px ${CG}`; g.fillText(`（推定）${T.pass?"LULUS":"TIDAK LULUS"}`, vx+vw/2, vy+112);
   g.textAlign="left";
   // 区分の 表
-  const cols=[64,500,670,830], ty=380;
+  const cols=[64,500,670,830];
   g.fillStyle=MUT; g.font=`400 24px ${CG}`;
   ["区分","せいかい","点数（推定）","基準点"].forEach((t,i)=>g.fillText(t, cols[i], ty-26));
   g.font=`400 19px ${CG}`; ["Bagian","Benar","Nilai","Minimum"].forEach((t,i)=>g.fillText(t, cols[i], ty));
@@ -841,11 +881,13 @@ async function drawTotal(){
     g.fillStyle=INK; g.font=`400 26px ${CG}`; g.fillText(crit, cols[3], y);
     g.fillStyle=pass?OK:NG; g.font=`700 34px ${CG}`; g.fillText(pass?"○":"×", W-92, y);
   };
-  line(ty+80, "言語知識・読解", `${T.lkOk}/${T.lkN}`, T.lk, SCORE.lk.max, String(SCORE.lk.min), T.lkPass, false, "Pengetahuan Bahasa & Membaca");
-  g.fillStyle="#d5dad6"; g.fillRect(56, ty+108, W-112, 2);
-  line(ty+170, "聴解", `${T.lsOk}/${T.lsN}`, T.ls, SCORE.ls.max, String(SCORE.ls.min), T.lsPass, false, "Mendengarkan");
-  g.fillStyle=INK; g.fillRect(56, ty+198, W-112, 3);
-  line(ty+262, "総合得点", "", T.total, SCORE.total, `合格点 ${SCORE.pass}`, T.totalPass, true, `Nilai total (batas lulus ${SCORE.pass})`);
+  T.parts.forEach((p,i) => {
+    const y = ty+80+i*90;
+    line(y, p.name, `${p.ok}/${p.n}`, p.pts, p.max, String(p.min), p.pass, false, p.idLong||p.id);
+    if(i<NP-1){ g.fillStyle="#d5dad6"; g.fillRect(56, y+28, W-112, 2); }
+  });
+  g.fillStyle=INK; g.fillRect(56, sumY-64, W-112, 3);
+  line(sumY, "総合得点", "", T.total, SCORE.total, `合格点 ${SCORE.pass}`, T.totalPass, true, `Nilai total (batas lulus ${SCORE.pass})`);
   // 大問ごと
   g.fillStyle=INK; g.font=`700 28px ${CG}`; g.fillText("大問ごとの せいかい", 64, top-48); g.fillStyle=MUT; g.font=`400 20px ${CG}`; g.fillText("Jawaban benar per mondai", 64, top-18);
   MD.forEach((o,i)=>{
@@ -893,7 +935,7 @@ function reviewHTML(){
       const it = x.it, me = S.lans[x.g];
       const pic = it.img ? `<img src="${base}${it.img}" alt="${esc(it.imgDesc||"")}">` : "";
       const scr = `<div class="scr">${it.script.map(([s,t])=>`<div>${s?`<b>${s}</b> `:""}${t}</div>`).join("")}</div>`;
-      body += `<div class="q"><div class="top"><b class="no">${it.no}ばん</b><span>聴解 もんだい${x.md.no}　Mendengarkan – Mondai ${x.md.no}</span></div>
+      body += `<div class="q"><div class="top"><b class="no">${BANW(it.no)}</b><span>聴解 ${MDW(x.md.no)}　Mendengarkan – Mondai ${x.md.no}</span></div>
         ${pic}<ol class="ch">${it.ch.map(c=>`<li>${c}</li>`).join("")}</ol>
         <p class="me">あなたの こたえ：${me ? me : "ぬっていない"}<span class="idt">Jawabanmu: ${me ? me : "tidak diisi"}</span></p>
         ${det(`${it.a}　${it.ch[it.a-1]}`, it.ja, it.id, scr)}</div>`;
@@ -911,16 +953,18 @@ h2 span{font-size:13px;font-weight:400;color:#5b646c}
 .sum b{font-size:17px}.pass{color:#2e7a4e;font-weight:700}.fail{color:#b3261e;font-weight:700}
 .q{background:#fff;border:1px solid #d5dad6;border-radius:8px;padding:14px;margin-bottom:12px}
 .top{display:flex;gap:10px;align-items:center;font-size:12.5px;color:#5b646c}.no{border:1.5px solid #1c2125;color:#1c2125;padding:0 7px;font-size:13px}
-.ins{font-size:12.5px;color:#5b646c;margin:6px 0}.stem{font-size:18px;line-height:2;margin:6px 0}
+.ins{font-size:12.5px;color:#5b646c;margin:6px 0}.stem{font-size:18px;line-height:2.2;margin:6px 0}
 .stem u{text-underline-offset:5px}.word{display:inline-block;border:1.5px solid #1c2125;padding:0 10px}
 .blank{display:inline-block;min-width:2.6em;border-bottom:1.5px solid #1c2125;margin:0 2px;text-align:center}
 .ch{margin:6px 0;padding-left:1.8em;font-size:16px}.ch li{margin:2px 0}
 .me{font-size:13.5px;color:#b3261e;margin:6px 0}
 details{border-top:1px dashed #d5dad6;margin-top:8px;padding-top:6px}summary{cursor:pointer;color:#22385a;font-weight:700;font-size:14px}
 .ans{font-weight:700;color:#2e7a4e}.id{color:#5b646c}
-.passage{background:#fff;border:1px solid #d5dad6;border-radius:4px;padding:12px 14px;margin:0 0 12px;line-height:2}
+.passage{background:#fff;border:1px solid #d5dad6;border-radius:4px;padding:12px 14px;margin:0 0 12px;line-height:2.2}
+ruby{ruby-position:over}rt{font-size:.5em;line-height:1}
+.stem,.ch,.passage,.scr{line-break:strict;overflow-wrap:break-word}.ch li{line-height:2}
 .passage .ttl{font-weight:700}.passage .mk{font-weight:700}
-.info{border-collapse:collapse;width:100%;font-size:13px;line-height:1.5}.info th,.info td{border:1px solid #1c2125;padding:4px}
+.info{border-collapse:collapse;width:100%;font-size:13px;line-height:1.9;table-layout:fixed}.info th,.info td{border:1px solid #1c2125;padding:4px}
 img{max-width:100%;border:1px solid #d5dad6;border-radius:4px;margin:6px 0}
 .scr{font-size:14px;background:#f6f7f5;border-radius:6px;padding:8px 10px;margin-top:6px}.scr b{font-size:12px;color:#5b646c}
 .note{font-size:13px;color:#5b646c}.good{font-size:18px;font-weight:700;color:#2e7a4e}
@@ -931,8 +975,8 @@ img{max-width:100%;border:1px solid #d5dad6;border-radius:4px;margin:6px 0}
 <p class="note">JLPT ${TEST.level} ${esc(TEST.title)}　${esc(who())}　${stamp().txt}</p>
 <div class="sum">判定：<span class="${T.pass?"pass":"fail"}">${T.pass?"合格":"不合格"}（推定）</span>　総合 <b>${T.total}</b>/${SCORE.total}
 <span class="idt">Hasil: ${T.pass?"LULUS":"TIDAK LULUS"} (perkiraan) ／ Nilai total ${T.total}/${SCORE.total}</span>
-言語知識・読解 ${T.lk}/${SCORE.lk.max}（基準点 ${SCORE.lk.min}）　聴解 ${T.ls}/${SCORE.ls.max}（基準点 ${SCORE.ls.min}）
-<span class="idt">Pengetahuan Bahasa & Membaca ${T.lk}/${SCORE.lk.max} (minimum ${SCORE.lk.min}) ／ Mendengarkan ${T.ls}/${SCORE.ls.max} (minimum ${SCORE.ls.min})</span>
+${T.parts.map(p=>`${p.name} ${p.pts}/${p.max}（基準点 ${p.min}）`).join("　")}
+<span class="idt">${T.parts.map(p=>`${p.idLong||p.id} ${p.pts}/${p.max} (minimum ${p.min})`).join(" ／ ")}</span>
 まちがえた 問題・ぬらなかった 問題：${count}問<span class="idt">Soal yang salah atau tidak diisi: ${count}</span></div>
 <p class="note">まず 自分で もう一度 といて から、「こたえと せつめいを 見る」を おして ください。<br>Coba jawab lagi dulu, lalu tekan "Lihat jawaban".</p>
 ${body}
@@ -940,15 +984,28 @@ ${body}
 </div></body></html>`;
 }
 
+/* 文字の 大きさ（100%・115%・130%）。この スマホに おぼえる */
+const ZOOMS = [1, 1.15, 1.3];
+function applyZoom(z){ document.documentElement.style.setProperty("--z", z); $("zoomBtn").textContent = z>1 ? `あ ${Math.round(z*100)}%` : "あ＋"; }
+(function(){
+  let z = 1; try{ z = +localStorage.getItem("jlptZoom") || 1; }catch(e){}
+  if(!ZOOMS.includes(z)) z = 1; applyZoom(z);
+  $("zoomBtn").onclick = () => { const cur = +getComputedStyle(document.documentElement).getPropertyValue("--z") || 1;
+    const nz = ZOOMS[(ZOOMS.indexOf(cur)+1) % ZOOMS.length]; applyZoom(nz); try{ localStorage.setItem("jlptZoom", nz); }catch(e){} };
+})();
 async function boot(){
   try{
     CATALOG = await (await fetch("catalog.json?t=" + Date.now())).json();
     const all = CATALOG.levels.flatMap(l => l.tests.map(t => ({...t, level:l.level})));
     const want = new URLSearchParams(location.search).get("t");
     TEST = all.find(t => t.id === want) || all.find(t => t.level === "N4") || all[0];
-    const data = await (await fetch(TEST.id + ".json?t=" + Date.now())).json();
+    /* データの 中の {漢字|かんじ} を ルビ（<ruby>）に する。{Q18} の ような 番号の 印は そのまま */
+    const raw = await (await fetch(TEST.id + ".json?t=" + Date.now())).text();
+    const data = JSON.parse(raw.replace(/\{([^{}|"\\]+)\|([^{}|"\\]+)\}/g, "<ruby>$1<rt>$2</rt></ruby>"));
+    /* ★の わく（.blank が 4つ ならぶ ところ）を まとめて、スマホでも 1行で 見えるように する */
+    data.sections.forEach(sec => sec.items.forEach(q => { if(q.stem) q.stem = q.stem.replace(/((?:<span class="blank[^"]*">[^<]*<\/span>\s*){3}<span class="blank[^"]*">[^<]*<\/span>)/, '<span class="slots">$1</span>'); }));
     SECS = data.sections; LISTEN = data.listen; VERSION = data.version || ""; BREAKS = data.breaks || [];
-    SCORE = data.scoring || SCORE_DEFAULT;
+    SCORE = normScore(data.scoring);
   }catch(e){
     $("app").innerHTML = '<p class="lead" style="margin-top:24px">問題を 読みこめませんでした。インターネットの 接続を たしかめて、ページを 読みこみなおして ください。</p>';
     return;
