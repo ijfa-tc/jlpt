@@ -184,6 +184,16 @@ details.more summary{cursor:pointer;font-size:13px;color:var(--muted)}
 .lvb small{font-weight:400;font-size:11.5px;color:var(--muted)}
 .lvb.on{border-color:var(--ink);background:var(--sheet-soft)}
 .lvb.off{opacity:.5}
+.lvtabs{display:grid;grid-template-columns:repeat(var(--n,3),1fr);gap:0;border:1.5px solid var(--ink);border-radius:8px;overflow:hidden;margin:4px 0 14px}
+.lvtabs button{border:0;border-left:1.5px solid var(--ink);background:transparent;color:var(--ink);font-weight:700;font-size:17px;padding:9px 4px;line-height:1.2}
+.lvtabs button:first-child{border-left:0}
+.lvtabs button small{display:block;font-weight:400;font-size:11px;color:var(--muted)}
+.lvtabs button[aria-pressed="true"]{background:var(--ink);color:var(--sheet-bg)}
+.lvtabs button[aria-pressed="true"] small{color:var(--sheet-bg);opacity:.8}
+a.tcard{color:var(--ink);text-decoration:none;grid-template-columns:1fr auto;align-items:center}
+a.tcard .go{font-size:22px;color:var(--muted)}
+a.tcard .meta b{color:var(--ink)}
+.back{display:inline-block;margin:14px 0 0;color:var(--accent);font-size:14px;text-decoration:none;font-weight:700}
 .one-field{display:grid;gap:4px;font-size:12.5px;color:var(--muted)}
 .one-field input{font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%}
 .passage{font-family:var(--f-paper);font-size:calc(15.5px*var(--z,1));line-height:2.2;line-break:strict;overflow-wrap:break-word;border:1px solid var(--rule);border-radius:4px;padding:12px 14px;margin:4px 0 14px;max-height:42vh;overflow:auto;background:var(--paper)}
@@ -264,7 +274,11 @@ function setHeader(name, showSheet){ $("secName").textContent = name; $("openShe
 /* ---------- record (このスマホの ブラウザに のこす。リセットで けす) ---------- */
 const recKey = () => "jlptRec:" + TEST.id;
 function saveRec(){
-  try{ localStorage.setItem(recKey(), JSON.stringify({ans:S.ans, lans:S.lans, done:S.done, tend:S.tend, at:Date.now()})); }catch(e){}
+  let sum = null;
+  try{ const n = SECS.filter(s=>S.done[s.id]).length + (S.done.listen?1:0);
+    sum = {done:n, of:SECS.length+1, started:n>0 || SECS.some(s=>S.ans[s.id].some(Boolean)) || S.lans.some(Boolean)};
+    if(allDone()){ const T = totals(); sum.total = T.total; sum.max = SCORE.total; sum.pass = T.pass; } }catch(e){}
+  try{ localStorage.setItem(recKey(), JSON.stringify({ans:S.ans, lans:S.lans, done:S.done, tend:S.tend, at:Date.now(), sum})); }catch(e){}
 }
 function loadRec(){
   try{
@@ -353,6 +367,40 @@ function refreshBubbles(){
   document.querySelectorAll(".bub:not([disabled])").forEach(b => b.setAttribute("aria-checked", getAns(b.dataset.k)===+b.dataset.v));
 }
 
+/* ---------- top（レベル → 模試の 一覧） ---------- */
+function recSum(id){ try{ const r = JSON.parse(localStorage.getItem("jlptRec:"+id) || "null"); return r ? (r.sum || {old:true, done:Object.values(r.done||{}).filter(Boolean).length}) : null; }catch(e){ return null; } }
+function topPage(){
+  S = {view:"top"}; setHeader("JLPT 模擬試験", false); $("strip").hidden = true;
+  const P = new URLSearchParams(location.search), LV = CATALOG.levels;
+  let lv = P.get("lv"); if(!lv){ try{ lv = localStorage.getItem("jlptLv"); }catch(e){} }
+  if(!LV.some(l=>l.level===lv)) lv = (LV.find(l=>l.level==="N4") || LV.find(l=>l.tests.length) || LV[0]).level;
+  const status = t => {
+    const r = recSum(t.id);
+    if(!r || (!r.done && !r.started)) return `まだ ${ID("Belum")}`;
+    if(r.total!=null) return `おわり ・ 合計 <b>${r.total}</b> / ${r.max} ・ ${r.pass?"合格":"不合格"}（推定）${ID(r.pass?"Lulus (perkiraan)":"Tidak lulus (perkiraan)")}`;
+    return `とちゅう（${r.done}${r.of?" / "+r.of:""} おわり）${ID("Belum selesai")}`;
+  };
+  const draw = () => {
+    const L = LV.find(l=>l.level===lv);
+    $("tabs").innerHTML = LV.map(l=>`<button type="button" data-lv="${l.level}" aria-pressed="${l.level===lv}">${l.level}<small>${l.tests.length?`${l.tests.length}回`:"じゅんびちゅう"}</small></button>`).join("");
+    $("tabs").style.setProperty("--n", LV.length);
+    $("tlist").innerHTML = `<h3 style="margin:0 0 8px;font-size:15px">模擬試験${ID("Simulasi ujian")}</h3>` + (L.tests.length
+      ? L.tests.map(t=>`<a class="card tcard" href="?t=${t.id}"><div><h3>JLPT ${lv} ${t.title}</h3><div class="meta">${status(t)}</div></div><span class="go" aria-hidden="true">›</span></a>`).join("")
+      : `<div class="card"><p>${lv} は じゅんびちゅうです。${ID("Sedang disiapkan.")}</p></div>`);
+    $("tabs").querySelectorAll("[data-lv]").forEach(b => b.onclick = () => {
+      lv = b.dataset.lv; try{ localStorage.setItem("jlptLv", lv); }catch(e){}
+      history.replaceState(null, "", "?lv=" + lv); draw();
+    });
+  };
+  $("app").innerHTML = `
+    <h1>JLPT 模擬試験</h1>
+    <p class="lead">レベルを えらんで、模擬試験を はじめます。本番と 同じ 問題の 数と 時間です。${ID("Pilih level, lalu mulai simulasi ujian. Jumlah soal dan waktunya sama dengan ujian sebenarnya.")}</p>
+    <div class="lvtabs" id="tabs" role="group" aria-label="レベル"></div>
+    <div id="tlist"></div>
+    <p class="foot">試験運用版です。問題は IJFA トレーニングセンターの オリジナルです。聴解の 音声は 音声合成で 作っています。こたえは この スマホの ブラウザに のこります（ページを とじても きえません）。</p>`;
+  draw(); window.scrollTo(0,0);
+}
+
 /* ---------- home ---------- */
 function levelCard(){
   return `<div class="card"><h3>レベル</h3><div class="lv">${CATALOG.levels.map(l=>{
@@ -372,6 +420,7 @@ function scoreHTML(r){
 }
 function home(){
   stopTimer(); stopAudio(); S.view="home"; setHeader(`JLPT ${TEST.level} 模擬試験`, false);
+  saveRec();   // 一覧に 出す まとめ（sum）を 新しく する
   $("strip").hidden = true;
   // 本番の 休憩（テストの あいだ）。データに breaks が あれば 表示する
   const BRK = BREAKS;
@@ -386,10 +435,10 @@ function home(){
     </div>`;}).join("");
   const started = SECS.some(s=>S.done[s.id] || S.ans[s.id].some(Boolean)) || S.done.listen || S.lans.some(Boolean);
   $("app").innerHTML = `
+    <a class="back" href="?lv=${TEST.level}">‹ ${TEST.level} の 模擬試験 一覧${ID("Daftar simulasi ujian")}</a>
     <h1>JLPT ${TEST.level} ${TEST.title}</h1>
     ${S.flash ? `<div class="card flash" role="status">${S.flash}</div>` : ""}
     ${allDone() ? totalCard() : `<p class="lead">本番と同じように、マークシートの ①②③④ をタップして ぬります。もう一度タップすると けせます。3つの テストが ぜんぶ おわると、合計点と 合否判定が 出ます。${ID("Nilai total muncul setelah 3 tes selesai.")}</p>`}
-    ${levelCard()}
     <div class="card">
       <h3>なまえ</h3>
       <label class="one-field" for="nm">なまえ（ローマ字でも いいです。入れなくても できます）<input id="nm" autocomplete="name" value="${esc(S.name)}"></label>
@@ -998,7 +1047,9 @@ async function boot(){
     CATALOG = await (await fetch("catalog.json?t=" + Date.now())).json();
     const all = CATALOG.levels.flatMap(l => l.tests.map(t => ({...t, level:l.level})));
     const want = new URLSearchParams(location.search).get("t");
-    TEST = all.find(t => t.id === want) || all.find(t => t.level === "N4") || all[0];
+    TEST = all.find(t => t.id === want);
+    if(!TEST){ topPage(); return; }
+    try{ localStorage.setItem("jlptLv", TEST.level); }catch(e){}
     /* データの 中の {漢字|かんじ} を ルビ（<ruby>）に する。{Q18} の ような 番号の 印は そのまま */
     const raw = await (await fetch(TEST.id + ".json?t=" + Date.now())).text();
     const data = JSON.parse(raw.replace(/\{([^{}|"\\]+)\|([^{}|"\\]+)\}/g, "<ruby>$1<rt>$2</rt></ruby>"));
