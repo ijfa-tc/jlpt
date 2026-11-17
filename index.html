@@ -419,7 +419,7 @@ function scoreHTML(r){
   return `<div class="secscore"><b>${r.ok}</b> / ${r.n}問 せいかい（${pct}%）</div>${ID(`Benar ${r.ok} dari ${r.n} soal (${pct}%)`)}`;
 }
 function home(){
-  stopTimer(); stopAudio(); S.view="home"; setHeader(`JLPT ${TEST.level} 模擬試験`, false);
+  stopTimer(); stopAudio(); wakeOff(); S.view="home"; setHeader(`JLPT ${TEST.level} 模擬試験`, false);
   saveRec();   // 一覧に 出す まとめ（sum）を 新しく する
   $("strip").hidden = true;
   // 本番の 休憩（テストの あいだ）。データに breaks が あれば 表示する
@@ -701,7 +701,7 @@ function result(which){
     $("back").onclick = home;
     $("app").querySelectorAll("[data-replay]").forEach(b => b.onclick = () => {
       const g=+b.dataset.replay; stopAudio();
-      playTimeline(L[g].it.timeline.map(s=>({...s,g})), ()=>{ $("ph"+g).textContent=""; }, (ph)=>{ $("ph"+g).textContent = ph; }, m=>{ $("ph"+g).textContent=m; });
+      playTimeline(L[g].it.timeline.map(s=>({...s,g})), ()=>{ $("ph"+g).textContent=""; }, (ph)=>{ $("ph"+g).textContent = ph; }, m=>{ $("ph"+g).textContent=m; }, ()=>{ $("ph"+g).textContent="止まりました。もう一度 おして ください。"; });
     });
   }
   window.scrollTo(0,0);
@@ -739,45 +739,91 @@ function listen(startMi){
         <div class="phase" id="phase"><span>音声は 1回だけ ながれます。とちゅうで とめられません。</span><span></span></div>
         <div class="startrow"><button class="btn" id="play">音声を はじめる</button>
           <label class="msel">はじめる ところ <select id="from">${LISTEN.mondai.map((md,mi)=>`<option value="${mi}" ${mi===(startMi||0)?"selected":""}>${MDW(md.no)}から</option>`).join("")}</select></label></div>
+        <p class="note" id="lnote" style="margin:0">とちゅうで 画面が 消えると、音声が 止まります。スマホの 自動ロック（画面が 消える 時間）を 長く して ください。止まった ときは、その 番から つづけられます。${ID("Kalau layar mati, audio berhenti. Atur kunci otomatis layar lebih lama. Kalau berhenti, kamu bisa lanjut dari nomor itu.")}</p>
       </div>
     </section>`;
   $("strip").hidden = false;
   $("stripIn").innerHTML = `<div class="sheetlabel"><span>かいとうようし　Answer Sheet</span><span id="lpos"></span></div><div id="lrow"></div>
     <div class="nav"><button class="btn ghost small" id="quit">やめる</button><span class="mid"></span><button class="btn small" id="lfin" disabled>おわる</button></div>`;
   listenPaper(firstG);
-  $("from").onchange = () => listenPaper(L.findIndex(x=>x.mi===+$("from").value));
-  $("quit").onclick = () => { stopAudio(); S.playing=false; home(); };
+  S.resumeG = null;
+  $("from").onchange = () => { S.resumeG = null; $("play").textContent = "音声を はじめる"; listenPaper(L.findIndex(x=>x.mi===+$("from").value)); };
+  $("quit").onclick = () => { stopAudio(); wakeOff(); S.playing=false; home(); };
   $("lfin").onclick = finishListen;
-  $("play").onclick = async () => {
-    const mi0 = +$("from").value;
-    $("play").disabled = true; $("from").disabled = true; $("play").textContent = "じゅんびしています";
-    S.playing = true;
-    for(let mi=mi0; mi<LISTEN.mondai.length && S.playing; mi++){
-      const md = LISTEN.mondai[mi];
-      const steps = [{f:md.insFile, gap:2.0, ph:`${MDW(md.no)}の せつめい`, g:L.findIndex(x=>x.mi===mi)}];
-      md.items.forEach((it,ii)=>{ const g=L.findIndex(x=>x.mi===mi && x.it===it); it.timeline.forEach(s=>steps.push({...s, g})); });
-      const ok = await new Promise(res => playTimeline(steps, () => res(true),
-        (ph, left, frac, g) => { if(g!==S.lcur) listenPaper(g); $("play").textContent = "ながれています";
-          $("phase").innerHTML = `<b>${ph}</b><span>${left!=null?"あと "+left+" 秒":""}</span>`; $("bar").style.width = Math.round(frac*100)+"%"; },
-        msg => { $("phase").innerHTML = `<b>${msg}</b>`; res(false); }));
-      if(!ok){ $("play").disabled = false; $("from").disabled = false; $("play").textContent = "もう一度 ためす"; S.playing=false; return; }
+  /* ここは タップの 中で すぐに 音声を はじめる（iPhone は タップの 中でないと 音が 出ない） */
+  $("play").onclick = () => runListen(S.resumeG!=null ? S.resumeG : L.findIndex(x=>x.mi===+$("from").value));
+}
+/* 番号 g0 から 最後まで ながす。大問の 最初の 番から なら、大問の せつめいも ながす */
+async function runListen(g0){
+  const L = LI(); S.resumeG = null;
+  $("play").disabled = true; $("from").disabled = true; $("play").textContent = "じゅんびしています";
+  S.playing = true; wakeOn();
+  for(let mi=L[g0].mi; mi<LISTEN.mondai.length && S.playing; mi++){
+    const md = LISTEN.mondai[mi];
+    const xs = L.filter(x=>x.mi===mi && x.g>=g0);
+    const steps = [];
+    if(xs[0].it === md.items[0]) steps.push({f:md.insFile, gap:2.0, ph:`${MDW(md.no)}の せつめい`, g:xs[0].g});
+    xs.forEach(x => x.it.timeline.forEach(s=>steps.push({...s, g:x.g})));
+    const r = await new Promise(res => playTimeline(steps, () => res("end"),
+      (ph, left, frac, g) => { if(S.view!=="listen") return; if(g!==S.lcur) listenPaper(g); $("play").textContent = "ながれています";
+        $("phase").innerHTML = `<b>${ph}</b><span>${left!=null?"あと "+left+" 秒":""}</span>`; $("bar").style.width = Math.round(frac*100)+"%"; },
+      msg => res({err:msg}),
+      g => res({intr:g})));
+    if(r !== "end"){
+      S.playing = false; wakeOff();
+      if(S.view!=="listen") return;
+      $("play").disabled = false; $("from").disabled = false;
+      if(r.intr!=null){
+        const g = r.intr, x = L[g]; S.resumeG = g; listenPaper(g);
+        $("phase").innerHTML = `<b>音声が 止まりました。</b><span></span>`;
+        $("lnote").innerHTML = `<span style="color:var(--ng);font-weight:700">画面が 消えたり、ほかの アプリに うつったり したので、音声が 止まりました。「${MDW(x.md.no)} ${BANW(x.it.no)}から つづける」を おすと、この 番の はじめから もう一度 ながれます。</span>${ID("Audio berhenti karena layar mati atau pindah ke aplikasi lain. Tekan tombol untuk lanjut dari awal nomor ini.")}`;
+        $("play").textContent = `${MDW(x.md.no)} ${BANW(x.it.no)}から つづける`;
+      } else {
+        $("phase").innerHTML = `<b>${r.err}</b>`;
+        $("play").textContent = "もう一度 ためす";
+      }
+      return;
     }
-    if(S.playing){ $("lfin").disabled = false; $("phase").innerHTML = `<b>おわりです。</b><span>「おわる」を おしてください</span>`; $("bar").style.width="100%"; }
-    S.playing = false;
-  };
+  }
+  wakeOff();
+  if(S.playing && S.view==="listen"){ $("lfin").disabled = false; $("phase").innerHTML = `<b>おわりです。</b><span>「おわる」を おしてください</span>`; $("bar").style.width="100%"; }
+  S.playing = false;
 }
 function finishListen(){
-  stopAudio(); S.playing = false; S.done.listen = true; saveRec(); closeSheet();
+  stopAudio(); wakeOff(); S.playing = false; S.done.listen = true; saveRec(); closeSheet();
   const r = secOk("listen");
   S.flash = flashHTML(LISTEN.name, "listen", r, false);
   home();
 }
 
 /* ---------- audio engine: decode, trim edge silence, schedule with exact gaps ---------- */
-let ctx = null, sources = [], uiTimer = 0;
+/* iPhone では 画面が 消えると 音声（AudioContext）が 止まる。止まったのを 見つけたら、
+   のこりの 音を 止めて onIntr(番号) を よぶ（その 番から やりなおせる）。
+   つぎに タップした とき、止まった AudioContext は すてて 新しく 作る */
+let ctx = null, sources = [], uiTimer = 0, curPlay = null, ctxBroken = false;
 const BUF = {};
+function ensureCtx(){
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if(ctx && (ctxBroken || ctx.state === "closed" || ctx.state === "interrupted")){ try{ ctx.close(); }catch(e){} ctx = null; }
+  ctxBroken = false;
+  if(!ctx){ ctx = new AC(); ctx.onstatechange = () => { if(curPlay && ctx && ctx.state !== "running") interruptAudio(); }; }
+  return ctx.resume();
+}
+function interruptAudio(){
+  const p = curPlay; if(!p) return;
+  ctxBroken = true; stopAudio();
+  if(p.onIntr) p.onIntr(p.g);
+}
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden") interruptAudio(); });
+window.addEventListener("pagehide", interruptAudio);
+/* 画面を 消さない（Wake Lock。iPhone は iOS 16.4 から） */
+let wake = null;
+async function wakeOn(){
+  try{ if("wakeLock" in navigator && !wake){ wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => { wake = null; }); } }catch(e){}
+}
+function wakeOff(){ try{ if(wake) wake.release(); }catch(e){} wake = null; }
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && S && S.playing) wakeOn(); });
 async function loadBuffers(names){
-  ctx = ctx || new (window.AudioContext||window.webkitAudioContext)();
   const need = [...new Set(names)].filter(k=>!BUF[k]);
   await Promise.all(need.map(async k => {
     const res = await fetch(`audio/${k}.mp3?v=${encodeURIComponent(VERSION)}`);
@@ -796,13 +842,18 @@ function edges(buf, keepTail){
   s = Math.max(0, s-pad); e = keepTail ? d.length-1 : Math.min(d.length-1, e+pad);
   return {off:s/sr, dur:(e-s)/sr};
 }
-async function playTimeline(steps, onEnd, onPhase, onError){
+/* ensureCtx() は タップの 中で すぐ よぶ ため、この 関数の 最初（await の 前）に おく */
+async function playTimeline(steps, onEnd, onPhase, onError, onIntr){
+  stopAudio();
   try{
-    ctx = ctx || new (window.AudioContext||window.webkitAudioContext)();
-    await ctx.resume();
+    const rs = ensureCtx();
+    await Promise.race([rs, new Promise(r => setTimeout(r, 3000))]);
+    if(ctx.state !== "running") throw new Error("not running");
     await loadBuffers(steps.map(s=>s.f));
+    if(ctx.state !== "running") throw new Error("not running");
   }catch(e){
-    if(onError) onError("音声を 読みこめませんでした。すこし まってから、ページを 読みこみなおして ください。");
+    ctxBroken = true;
+    if(onError) onError("音声を はじめられませんでした。もう一度 おして ください。だめな ときは、ページを 読みこみなおして ください。");
     return;
   }
   stopAudio();
@@ -818,18 +869,26 @@ async function playTimeline(steps, onEnd, onPhase, onError){
     t += step.gap;
   }
   const tEnd = t;
+  const play = curPlay = {onIntr, g:steps.length ? steps[0].g : null};
+  let lastNow = ctx.currentTime, lastWall = Date.now();
   const tick = () => {
+    if(curPlay !== play) return;
     const now = ctx.currentTime;
-    if(now >= tEnd){ clearInterval(uiTimer); onEnd(); return; }
+    if(now >= tEnd){ clearInterval(uiTimer); curPlay = null; onEnd(); return; }
+    /* 止まって いる：AudioContext が 動いて いない、または 時間が 3秒 以上 すすまない */
+    if(document.visibilityState === "hidden" || ctx.state !== "running"){ interruptAudio(); return; }
+    if(now !== lastNow){ lastNow = now; lastWall = Date.now(); }
+    else if(Date.now() - lastWall > 3000){ interruptAudio(); return; }
     let cur = marks[0];
     for(const m of marks) if(now >= m.t) cur = m;
+    play.g = cur.g;
     const left = cur.ans ? Math.ceil(cur.ans - now) : null;
     onPhase(now < t0 ? "まもなく はじまります" : cur.ph, left, (now-t0)/(tEnd-t0), cur.g);
   };
   clearInterval(uiTimer); uiTimer = setInterval(tick, 200); tick();
 }
 function stopAudio(){
-  clearInterval(uiTimer);
+  clearInterval(uiTimer); curPlay = null;
   sources.forEach(s=>{ try{s.stop()}catch(e){} }); sources = [];
 }
 
