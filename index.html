@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<meta name="theme-color" content="#ffffff">
 <title>JLPT 模擬試験｜IJFA</title>
 <meta name="description" content="JLPT の模擬試験（N5〜N3）。マークシート形式で、本番と同じ時間・流れで練習できます。IJFA トレーニングセンター作成。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,14 +24,7 @@ img{max-width:100%}
   --f-paper:"BIZ UDMincho","Hiragino Mincho ProN","Yu Mincho",serif;
   --f-ui:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --paper:#15191c; --sheet-bg:#1d2226; --ink:#e7eae8; --muted:#a3acb3; --rule:#343b40;
-  --sheet:#e7eae8; --sheet-soft:#262c30; --accent:#9db7e0; --accent-ink:#0f1720;
-  --ok:#7fc79c; --ng:#f2948c; --ok-soft:#1e3326; --ng-soft:#3d2220; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --paper:#15191c; --sheet-bg:#1d2226; --ink:#e7eae8; --muted:#a3acb3; --rule:#343b40;
-  --sheet:#e7eae8; --sheet-soft:#262c30; --accent:#9db7e0; --accent-ink:#0f1720;
-  --ok:#7fc79c; --ng:#f2948c; --ok-soft:#1e3326; --ng-soft:#3d2220; color-scheme:dark}
+/* いつも 白い 背景（スマホが ダークモードでも 黒く しない） */
 html,body{height:100%}
 body{background:var(--paper);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.6}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--sheet-bg)}
